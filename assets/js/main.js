@@ -1,1 +1,0 @@
-import{marked}from"marked";const contentElement=document.getElementById("content"),markdownFile="blog1.md";fetch(markdownFile).then(e=>e.text()).then(e=>{const t=marked(e);contentElement.innerHTML=t})["catch"](e=>{console.error("Error fetching the Markdown file:",e)});
