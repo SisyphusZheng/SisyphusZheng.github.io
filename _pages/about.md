@@ -1,6 +1,6 @@
 ---
 layout: about
-title: about
+title: 关于
 permalink: /
 subtitle: <a href='#'>联系信息</a>
 
