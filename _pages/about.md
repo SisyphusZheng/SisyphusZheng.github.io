@@ -2,24 +2,29 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
+subtitle: <a href='#'>联系信息</a>
 
 profile:
   align: right
   image: prof_pic.jpg
-  image_circular: false # crops the image to make it circular
+  image_circular: false # 将图片裁剪为非圆形
   more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
+    <p>电子邮箱：freemanzheng@hotmail.com</p>
+    <p>GitHub：<a href="https://github.com/SisyphusZheng" target="_blank">SisyphusZheng</a></p>
+    <p>个人网站：<a href="https://aircomponents.org" target="_blank">aircomponents.org</a></p>
 
-news: true # includes a list of news items
-selected_papers: true # includes a list of papers marked as "selected={true}"
-social: true # includes social icons at the bottom of the page
+news: false # 显示新闻列表
+selected_papers: false # 显示标记为 "selected=true" 的论文
+social: false # 显示社交媒体图标
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+我是郑治（SisyphusZheng），全栈开发工程师，特别热衷于 Web 组件和 JavaScript 技术。我目前正在构建一个名为 **air-components** 的 Web 组件库，同时也在探索与 React、Node、TypeScript 等相关的全栈开发技术。我希望将我的开发工作与设计理念融合，创造出更优雅且易于使用的开发工具和 UI 组件。
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+在此页面，你将了解我的一些个人信息、联系方式以及项目进展。我会定期更新博客内容与我的技术分享，欢迎关注。
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+你可以通过我的 GitHub 主页或个人网站了解更多关于我的项目和技术栈。如果你有任何问题或合作需求，欢迎通过电子邮件或社交媒体与我联系。
+
+社交链接：
+GitHub：[SisyphusZheng](https://github.com/SisyphusZheng)
+个人网站：[aircomponents.org](https://aircomponents.org)
+
