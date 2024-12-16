@@ -2,27 +2,27 @@
 # Site settings
 # -----------------------------------------------------------------------------
 
-title: blank # the website title (if blank, full name will be used instead)
-first_name: You
+title: Zhi Zheng # 网站标题，使用你的名字
+first_name: Zhi
 middle_name: R.
-last_name: Name
+last_name: Zheng
 contact_note: >
-  You can even add a little note about which of these is the best way to reach you.
-description: > # the ">" symbol means to ignore newlines until "footer_text:"
-  A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+  你可以通过电子邮件或 GitHub 与我联系：freemanzheng@hotmail.com。请随时向我提出问题或建议。
+description: >
+  这是一个简洁的学术网站，旨在展示我的个人项目与全栈开发技能。基于 [*folio](https://github.com/bogoli/-folio) 主题设计。
 footer_text: >
-  Powered by <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio">al-folio</a> theme.
-  Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
-  Photos from <a href="https://unsplash.com" target="_blank">Unsplash</a>.
-keywords: jekyll, jekyll-theme, academic-website, portfolio-website # add your own keywords or leave empty
-lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
-icon: ⚛️ # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
+  由 <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> 提供支持，使用 <a href="https://github.com/alshedivat/al-folio">al-folio</a> 主题。
+  托管于 <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>。
+  图片来自 <a href="https://unsplash.com" target="_blank">Unsplash</a>。
+keywords: jekyll, jekyll-theme, academic-website, portfolio-website, full-stack # 增加与全栈开发相关的关键字
+lang: cn # 网站语言设置为中文
+icon: ⚛️ # 网站的图标（使用你的选择）
+url: https://sisyphuszheng.github.io # 你的网站 URL
+baseurl: # 如果你的网站根目录下，则不需要子路径
+last_updated: true # 设置为 true，表示在页脚显示最后更新时间
+impressum_path: /impressum # 需要添加 "Impressum" 页面路径以符合 GDPR 要求
+back_to_top: true # 启用回到顶部按钮
 
-url: https://sisyphuszheng.github.io # the base hostname & protocol for your site
-baseurl:  # the subpath of your site, e.g. /blog/. Leave blank for root
-last_updated: false # set to true if you want to display last updated in the footer
-impressum_path: # set to path to include impressum link in the footer, use the same path as permalink in a page, helps to conform with EU GDPR
-back_to_top: true # set to false to disable the back to top button
 
 # -----------------------------------------------------------------------------
 # Theme
@@ -87,8 +87,8 @@ bing_site_verification: # out your bing-site-verification ID (Bing Webmaster)
 # Blog
 # -----------------------------------------------------------------------------
 
-blog_name: al-folio # blog_name will be displayed in your blog page
-blog_description: a simple whitespace theme for academics
+blog_name: 随想录 # blog_name will be displayed in your blog page
+blog_description: 针对于Js全栈开发与科技哲学进行讨论
 permalink: /blog/:year/:title/
 lsi: false # produce an index for related posts
 
