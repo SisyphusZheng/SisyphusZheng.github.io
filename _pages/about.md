@@ -18,13 +18,46 @@ selected_papers: false # 显示标记为 "selected=true" 的论文
 social: false # 显示社交媒体图标
 ---
 
-我是郑治（SisyphusZheng），全栈开发工程师，特别热衷于 Web 组件和 JavaScript 技术。我目前正在构建一个名为 **air-components** 的 Web 组件库，同时也在探索与 React、Node、TypeScript 等相关的全栈开发技术。我希望将我的开发工作与设计理念融合，创造出更优雅且易于使用的开发工具和 UI 组件。
+## 你好！👋 欢迎访问我的 GitHub 主页！
 
-在此页面，你将了解我的一些个人信息、联系方式以及项目进展。我会定期更新博客内容与我的技术分享，欢迎关注。
+我是 **郑治**，一名充满热情的开发者与设计工程师，专注于构建现代化与创新型的解决方案。
 
-你可以通过我的 GitHub 主页或个人网站了解更多关于我的项目和技术栈。如果你有任何问题或合作需求，欢迎通过电子邮件或社交媒体与我联系。
+### 🌱 我正在学习：
+- 全栈 JavaScript 开发，重点研究 React 的替代方案以及原生 Web 技术。
+- 探索模块化网页设计，并为开发者打造可复用的工具。
 
-社交链接：
-GitHub：[SisyphusZheng](https://github.com/SisyphusZheng)
-个人网站：[aircomponents.org](https://aircomponents.org)
+### 👯 希望合作的领域：
+- 提升生产力的 **Web Components** 库和工具。
+- 强调现代化 UI/UX 的开源项目。
+
+### 🎓 教育背景：
+- **爱尔兰利默里克大学** 软件工程硕士。
+- 目前获得了 AI 博士的拟录取资格。
+
+### 💼 求职意向：
+- 我正在积极寻找 **前端开发工程师**、**Web 开发工程师** 或 **全栈开发工程师** 的职位，希望能够为创新项目做出贡献并在现代 Web 技术领域不断精进。
+
+### 📫 联系方式：
+- **邮箱**: freemanzheng@hotmail.com  
+- **GitHub**: [SisyphusZheng](https://github.com/SisyphusZheng)
+
+### ⚡ 趣味事实：
+- 我对 **软件工程化** 和 **科学哲学** 非常感兴趣，并且探索这两个领域如何交叉来推动技术创新。
+
+---
+
+### 🌟 特色项目：
+- [Air Components](https://github.com/SisyphusZheng/air-components)：一个极简的 Web Components 库，旨在实现无缝集成与现代化设计。
+
+---
+
+### 🌐 社区贡献：
+- **CSDN 社区贡献**：在 CSDN 社区积累了 2k+ 粉丝，300k+ 阅读量，六篇博文被松山湖开发者村和开放原子基金会等社区收录。
+
+---
+
+### 📊 GitHub 统计：
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=SisyphusZheng&layout=compact)
+
+
 
