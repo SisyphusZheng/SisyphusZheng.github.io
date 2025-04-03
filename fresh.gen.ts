@@ -11,7 +11,7 @@ import * as $resume from "./routes/resume.tsx";
 import * as $BlogList from "./islands/BlogList.tsx";
 import * as $Navbar from "./islands/Navbar.tsx";
 import * as $Search from "./islands/Search.tsx";
-import { type Manifest } from "$fresh/server.ts";
+import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {

@@ -1,5 +1,5 @@
 import { siteConfig } from "../data/config.ts";
-import { join } from "std/path/mod.ts";
+import { join } from "https://deno.land/std@0.208.0/path/mod.ts";
 
 export interface SearchResult {
   type: "blog" | "project";

@@ -3,11 +3,7 @@ import tailwind from "$fresh/plugins/tailwind.ts";
 
 export default defineConfig({
   plugins: [tailwind()],
-  static: {
-    prefix: "/static/",
-    generate: true,
-    outDir: "dist",
-  },
+  static: true,
   build: {
     target: ["es2021", "chrome100", "safari13"],
     minify: true,

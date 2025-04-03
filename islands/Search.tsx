@@ -1,13 +1,13 @@
 import { h } from "preact";
-import { useSignal } from "@preact/signals";
+import { signal } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { t } from "../utils/i18n.ts";
 import { searchContent, type SearchResult } from "../utils/search.ts";
 
 export default function Search() {
-  const query = useSignal("");
-  const results = useSignal<SearchResult[]>([]);
-  const searching = useSignal(false);
+  const query = signal("");
+  const results = signal<SearchResult[]>([]);
+  const searching = signal(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
