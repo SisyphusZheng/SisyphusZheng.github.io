@@ -1,110 +1,138 @@
-import { useState, useEffect } from "preact/hooks";
-
-interface Blog {
-  title: string;
-  date: string;
-  slug: string;
-}
+/** jsx h */
+import { h } from "preact";
+import { useState } from "preact/hooks";
+import { currentLocale, t, type Locale } from "../utils/i18n.ts";
+import Search from "./Search.tsx";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isBlogOpen, setIsBlogOpen] = useState(false);
-  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/blogs") // 这里会请求一个 API，返回博客列表
-      .then((res) => res.json())
-      .then((data) => setBlogs(data));
-  }, []);
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const toggleSearch = () => {
+    setShowSearch(!showSearch);
+  };
+
+  const toggleLocale = () => {
+    currentLocale.value = currentLocale.value === "zh-CN" ? "en-US" : "zh-CN";
+  };
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-40 shadow-sm">
-      <div className="container mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <a
-              href="#"
-              className="text-xl font-bold text-indigo-600 dark:text-indigo-400"
-            >
-              Zhi
-            </a>
-          </div>
-
-          <div className="hidden md:block">
-            <div className="flex items-center space-x-6">
-              <a
-                href="#"
-                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600"
-              >
-                首页
-              </a>
-              <a
-                href="#projects"
-                className="text-gray-700 dark:text-gray-200 hover:text-indigo-600"
-              >
-                项目
-              </a>
-              <div className="relative">
-                <button
-                  onClick={() => setIsBlogOpen(!isBlogOpen)}
-                  className="text-gray-700 dark:text-gray-200 hover:text-indigo-600 focus:outline-none"
-                >
-                  博客
-                </button>
-                {isBlogOpen && (
-                  <div className="absolute left-0 mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-2">
-                    {blogs.map((blog) => (
-                      <a
-                        key={blog.slug}
-                        href={`/${blog.slug}`}
-                        className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                      >
-                        {blog.title}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <a
-                href="#contact"
-                className="bg-indigo-600 text-white py-2 px-4 rounded-lg"
-              >
-                联系我
+    <nav class="bg-white shadow-lg">
+      <div class="max-w-6xl mx-auto px-4">
+        <div class="flex justify-between">
+          <div class="flex space-x-7">
+            <div>
+              <a href="/" class="flex items-center py-4">
+                <span class="font-semibold text-gray-500 text-lg">
+                  {t("nav.home")}
+                </span>
               </a>
             </div>
           </div>
 
-          <div className="md:hidden">
+          <div class="hidden md:flex items-center space-x-8">
+            {/* 搜索按钮 */}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 dark:text-gray-200"
+              onClick={toggleSearch}
+              class="text-gray-500 hover:text-gray-700 transition-colors"
             >
-              <svg
-                className="h-6 w-6"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                fill="none"
-              >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            {/* 导航链接 */}
+            <a href="/blog" class="text-gray-500 hover:text-gray-700 transition-colors">
+              {t("nav.blog")}
+            </a>
+            <a href="/projects" class="text-gray-500 hover:text-gray-700 transition-colors">
+              {t("nav.projects")}
+            </a>
+            <a href="/resume" class="text-gray-500 hover:text-gray-700 transition-colors">
+              {t("nav.resume")}
+            </a>
+
+            {/* 语言切换 */}
+            <button
+              onClick={toggleLocale}
+              class="text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              {currentLocale.value === "zh-CN" ? "EN" : "中"}
+            </button>
+          </div>
+
+          {/* 移动端菜单按钮 */}
+          <div class="md:hidden flex items-center">
+            <button class="outline-none" onClick={toggleMenu}>
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isOpen ? (
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                 )}
               </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* 搜索组件 */}
+        <div class={`${showSearch ? "block" : "hidden"} py-4`}>
+          <Search />
+        </div>
+
+        {/* 移动端菜单 */}
+        {showSearch && (
+          <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-start justify-center pt-20">
+            <div class="w-full max-w-2xl mx-4">
+              <div class="bg-white rounded-lg shadow-xl p-4">
+                <div class="flex justify-between items-center mb-4">
+                  <h2 class="text-xl font-semibold">{t("search.placeholder")}</h2>
+                  <button
+                    onClick={toggleSearch}
+                    class="text-gray-500 hover:text-gray-700"
+                  >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <Search />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 移动端菜单 */}
+        <div class={`md:hidden ${isOpen ? "block" : "hidden"}`}>
+          <div class="flex flex-col space-y-4 pb-4">
+            <a href="/blog" class="text-gray-500 hover:text-gray-700 transition-colors">
+              {t("nav.blog")}
+            </a>
+            <a href="/projects" class="text-gray-500 hover:text-gray-700 transition-colors">
+              {t("nav.projects")}
+            </a>
+            <a href="/resume" class="text-gray-500 hover:text-gray-700 transition-colors">
+              {t("nav.resume")}
+            </a>
+            <button
+              onClick={toggleLocale}
+              class="text-left text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              {currentLocale.value === "zh-CN" ? "Switch to English" : "切换到中文"}
+            </button>
+            <button
+              onClick={toggleSearch}
+              class="text-left text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              {t("search.placeholder")}
             </button>
           </div>
         </div>
       </div>
     </nav>
   );
-}
+} 

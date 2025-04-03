@@ -1,168 +1,202 @@
-// routes/index.tsx
-import { Head } from "$fresh/runtime.ts";
-import { Handlers, PageProps } from "$fresh/server.ts";
-import { asset } from "$fresh/runtime.ts";
-import Navbar from "../islands/Navbar.tsx";
+import { Handlers } from "$fresh/server.ts";
+import Layout from "../components/Layout.tsx";
 import Hero from "../components/Hero.tsx";
-import Projects from "../components/Projects.tsx";
-import Blog from "../components/Blog.tsx";
-import ThemeToggle from "../islands/ThemeToggle.tsx";
-import Footer from "../components/Footer.tsx";
-interface ProfileData {
-  name: string;
+import { siteConfig } from "../data/config.ts";
+
+interface Post {
+  slug: string;
   title: string;
-  educations: Array<{
-    school: string;
-    degree: string;
-    period: string;
-    courses?: string[];
-  }>;
-  contact: {
-    email: string;
-    phone: string;
-    github: string;
-    devto: string;
-  };
-  skills: {
-    frontend: string[];
-    backend: string[];
-    devops: string[];
-  };
-  experiences: Array<{
-    organization: string;
-    role: string;
-    period: string;
-    description: string[];
-  }>;
-  honors: Array<{
-    title: string;
-    year: string;
-  }>;
+  date: string;
+  tags: string[];
+  content: string;
 }
 
-export const handler: Handlers<ProfileData> = {
-  async GET(req, ctx) {
-    const profileData: ProfileData = {
-      name: "郑治",
-      title: "前端工程师 / 软件工程硕士",
-      educations: [
-        {
-          school: "爱尔兰利莫瑞克大学",
-          degree: "软件工程硕士",
-          period: "2023-2026.01",
-          courses: [
-            "软件质量",
-            "软件进化",
-            "HCI(人机交互)",
-            "项目管理",
-            "软件架构",
-          ],
-        },
-        {
-          school: "重庆大学城市科技学院",
-          degree: "软件工程本科",
-          period: "2018-2022",
-          courses: [
-            "编程技术92%",
-            "算法分析97%",
-            "Linux 基础 91%",
-            "高级编程技术 91%",
-          ],
-        },
-      ],
-      contact: {
-        email: "zhizheng@z-js.dev",
-        phone: "13370765023",
-        github: "SisyphusZheng",
-        devto: "SisyphusZheng",
-      },
-      skills: {
-        frontend: [
-          "TypeScript",
-          "React Hooks",
-          "TailwindCSS",
-          "Vite",
-          "Web Components",
-          "StencilJS",
-        ],
-        backend: [
-          "Node.js",
-          "Express",
-          "MongoDB",
-          "RESTful API",
-          "JWT",
-          "OAuth",
-        ],
-        devops: [
-          "Git",
-          "GitHub Actions",
-          "Docker",
-          "Linux",
-          "Nginx",
-          "Bash/Fish",
-        ],
-      },
-      experiences: [
-        {
-          organization: "利莫瑞克⼤学计算机社团",
-          role: "成员",
-          period: "2023-09 ~ 2025-01",
-          description: [
-            "欧洲PythonCon会议志愿者",
-            "IrlCPC(爱尔兰程序设计)2024集训",
-          ],
-        },
-        {
-          organization: "学院软件社团与计算机社团",
-          role: "软社社⻓,计社部⻓",
-          period: "2020-09 ~ 2021-06",
-          description: [
-            "协助教研室CCPC&蓝桥杯集训",
-            "校内赛WebDev培训",
-            "工作室",
-          ],
-        },
-      ],
-      honors: [
-        { title: "爱尔兰利莫瑞克大学优秀硕士录取奖学金", year: "2023-09" },
-        { title: "重庆市优秀毕业生", year: "2022-06" },
-        { title: "第九届CCPC重庆市三等奖", year: "2018-06" },
-        { title: "重庆城市科技学院优秀毕业生", year: "2022-06" },
-        { title: "重庆城市科技学院优秀学共青团干与学干", year: "连续四年" },
-        { title: "重庆城市科技学院综测奖学金", year: "连续三年" },
-      ],
-    };
+export const handler: Handlers = {
+  async GET(_req, ctx) {
+    // 读取最近的博客文章
+    const posts: Post[] = [];
+    for await (const dirEntry of Deno.readDir("./blog")) {
+      if (dirEntry.isFile && dirEntry.name.endsWith(".md")) {
+        const file = await Deno.readTextFile(`./blog/${dirEntry.name}`);
+        const { attrs, body } = parseFrontMatter(file);
+        posts.push({
+          slug: dirEntry.name.replace(".md", ""),
+          title: attrs.title || "未命名文章",
+          date: attrs.date || new Date().toISOString(),
+          tags: attrs.tags ? attrs.tags.split(",").map((tag: string) => tag.trim()) : [],
+          content: body,
+        });
+      }
+    }
+    // 按日期排序，获取最新的文章
+    const latestPost = posts.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    )[0];
 
-    return ctx.render(profileData);
+    // 获取最新的项目
+    const latestProject = siteConfig.projects.items[0];
+
+    return ctx.render({ latestPost, latestProject });
   },
 };
 
-export default function ProfilePage({ data }: PageProps<ProfileData>) {
-  return (
-    <>
-      <Head>
-        <title>{data.name} | 个人主页</title>
-        <meta name="description" content="前端工程师，软件工程硕士的个人主页" />
-        <link rel="stylesheet" href={asset("/styles.css")} />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-        <script src={asset("/js/animation.js")}></script>
-      </Head>
-      <div
-        id="app"
-        className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300"
-      >
-        <div className="fixed right-5 top-5 z-50">
-          <ThemeToggle />
-        </div>
-        <Navbar />
-        <main>
-          <Hero data={data} />
-          <Projects />
-          <Blog />
-        </main>
-        <Footer data={data} />
-      </div>
-    </>
-  );
+function parseFrontMatter(content: string): { attrs: Record<string, any>; body: string } {
+  const lines = content.split("\n");
+  const attrs: Record<string, any> = {};
+  let body = content;
+  let inFrontMatter = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line === "---") {
+      if (!inFrontMatter) {
+        inFrontMatter = true;
+        continue;
+      } else {
+        body = lines.slice(i + 1).join("\n");
+        break;
+      }
+    }
+
+    if (inFrontMatter) {
+      const [key, ...values] = line.split(":");
+      if (key && values.length > 0) {
+        const value = values.join(":").trim();
+        attrs[key.trim()] = value.replace(/^['"]|['"]$/g, "");
+      }
+    }
+  }
+
+  return { attrs, body };
 }
+
+export default function Home({ data }: { data: { latestPost: Post; latestProject: any } }) {
+  const { latestPost, latestProject } = data;
+  
+  return (
+    <Layout>
+      <Hero />
+      
+      {/* 技能展示区域 */}
+      <section class="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+            {siteConfig.skills.title}
+          </h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {siteConfig.skills.items.map((skill, index) => (
+              <div 
+                class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div class="text-4xl mb-4">{skill.icon}</div>
+                <h3 class="text-xl font-semibold">{skill.name}</h3>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 最新动态 */}
+      <section class="py-16 bg-gradient-to-b from-white to-gray-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+            {siteConfig.news.title}
+          </h2>
+          <div class="grid md:grid-cols-2 gap-8">
+            {/* 最新博客文章 */}
+            <div class="bg-white p-6 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
+              <h3 class="text-xl font-semibold mb-4">{siteConfig.news.items[0].title}</h3>
+              {latestPost ? (
+                <>
+                  <h4 class="text-lg font-medium mb-2">
+                    <a href={`/blog/${latestPost.slug}`} class="text-blue-600 hover:text-blue-800">
+                      {latestPost.title}
+                    </a>
+                  </h4>
+                  <p class="text-gray-500 mb-2">
+                    {new Date(latestPost.date).toLocaleDateString()}
+                  </p>
+                  <p class="text-gray-600 mb-4">
+                    {latestPost.content.split("\n")[0]}
+                  </p>
+                  <a
+                    href={`/blog/${latestPost.slug}`}
+                    class="text-blue-600 hover:text-blue-800 inline-flex items-center"
+                  >
+                    {siteConfig.news.items[0].linkText}
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </a>
+                </>
+              ) : (
+                <p class="text-gray-600">暂无博客文章</p>
+              )}
+            </div>
+
+            {/* 最新项目 */}
+            <div class="bg-white p-6 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
+              <h3 class="text-xl font-semibold mb-4">{siteConfig.news.items[1].title}</h3>
+              {latestProject ? (
+                <>
+                  <h4 class="text-lg font-medium mb-2">
+                    <a href={latestProject.link} class="text-blue-600 hover:text-blue-800" target="_blank">
+                      {latestProject.title}
+                    </a>
+                  </h4>
+                  <p class="text-gray-600 mb-4">
+                    {latestProject.description}
+                  </p>
+                  <div class="flex flex-wrap gap-2 mb-4">
+                    {latestProject.tags.map((tag: string) => (
+                      <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <a
+                    href={latestProject.link}
+                    class="text-blue-600 hover:text-blue-800 inline-flex items-center"
+                    target="_blank"
+                  >
+                    {siteConfig.news.items[1].linkText}
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </>
+              ) : (
+                <p class="text-gray-600">暂无项目</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 统计数据 */}
+      <section class="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
+              <div class="text-4xl font-bold text-blue-600 mb-2">240K+</div>
+              <p class="text-gray-600">博客浏览量</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
+              <div class="text-4xl font-bold text-blue-600 mb-2">1K+</div>
+              <p class="text-gray-600">博客粉丝</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
+              <div class="text-4xl font-bold text-blue-600 mb-2">7</div>
+              <p class="text-gray-600">社区收录文章</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
+              <div class="text-4xl font-bold text-blue-600 mb-2">2</div>
+              <p class="text-gray-600">开源项目</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </Layout>
+  );
+} 
