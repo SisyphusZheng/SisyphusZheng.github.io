@@ -29,6 +29,7 @@ export default function Layout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="author" content={siteConfig.site.author} />
         <meta name="generator" content="FreshPress" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/styles.css" />
         <link
           rel="stylesheet"

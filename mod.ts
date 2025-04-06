@@ -1,5 +1,6 @@
 /**
  * FreshPress - A modern static site generator based on Fresh framework
+ * Built with Fresh 🍋 (https://fresh.deno.dev)
  * @module freshpress
  */
 
@@ -22,7 +23,7 @@ export const VERSION = "0.2.0";
 export const about = {
   name: "FreshPress",
   description: "A modern static site generator based on Fresh framework",
-  repository: "https://github.com/username/freshpress",
+  repository: "https://deno.land/x/freshpress",
   author: "FreshPress Team",
   license: "MIT",
 };

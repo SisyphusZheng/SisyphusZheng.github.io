@@ -1,16 +1,33 @@
 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 柠檬底色 -->
-  <circle cx="100" cy="100" r="90" fill="#FFE135" />
   
-  <!-- 柠檬纹理 -->
-  <path d="M100 190C149.706 190 190 149.706 190 100C190 50.2944 149.706 10 100 10C50.2944 10 10 50.2944 10 100C10 149.706 50.2944 190 100 190Z" stroke="#FFB800" stroke-width="3" />
+  <!-- 橘子侧面主体 -->
+  <ellipse cx="100" cy="110" rx="70" ry="60" fill="#FFCB00" />
   
-  <!-- 叶子 -->
-  <path d="M110 25C110 25 130 5 155 20C155 20 140 40 115 40C115 40 110 35 110 25Z" fill="#4CAF50" />
+  <!-- 切面 -->
+  <path d="M170 110C170 110 160 60 100 60C40 60 30 110 30 110C30 110 40 160 100 160C160 160 170 110 170 110Z" fill="#FFE145" />
   
-  <!-- F字母 - Fresh -->
-  <path d="M55 70H85V90H60V110H80V130H60V170H45V70H55Z" fill="#2563EB" />
+  <!-- 橘子分瓣 -->
+  <path d="M100 60V160" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 4" />
+  <path d="M70 62L70 158" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 4" />
+  <path d="M130 62L130 158" stroke="#FFB800" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 4" />
   
-  <!-- P字母 - Press -->
-  <path d="M95 70H125C135 70 145 80 145 90C145 100 135 110 125 110H110V170H95V70ZM110 90V95H120C122 95 125 93 125 90C125 87 122 85 120 85H110V90Z" fill="#2563EB" />
+  <!-- 果肉质感 -->
+  <path d="M160 110C160 133.137 133.137 140 100 140C66.8629 140 40 133.137 40 110C40 86.8629 66.8629 80 100 80C133.137 80 160 86.8629 160 110Z" fill="#FFF6D6" fill-opacity="0.3" />
+  
+  <!-- 侧面果肉纹理 -->
+  <path d="M100 80C115 80 125 90 130 100C135 110 135 120 130 130C125 140 115 140 100 140" stroke="#FFB800" stroke-width="1" stroke-dasharray="1 2" />
+  
+  <!-- 增强叶子 -->
+  <path d="M100 50C100 50 120 30 145 45C145 45 130 65 105 65C105 65 100 60 100 50Z" fill="#69B578" />
+  <path d="M100 50C100 50 120 30 145 45" stroke="#3D8361" stroke-width="1.5" stroke-linecap="round" />
+  
+  <!-- 吉卜力风格装饰 - 小光点 -->
+  <circle cx="128" cy="92" r="2" fill="white" fill-opacity="0.8" />
+  <circle cx="150" cy="110" r="1.5" fill="white" fill-opacity="0.8" />
+  <circle cx="70" cy="140" r="2.5" fill="white" fill-opacity="0.7" />
+  <circle cx="90" cy="80" r="1.8" fill="white" fill-opacity="0.6" />
+  
+  <!-- 果汁滴落效果 -->
+  <path d="M58 140C58 140 56 150 60 155C64 160 66 150 66 150" fill="#FFDF80" />
+  <path d="M58 140C58 140 56 150 60 155C64 160 66 150 66 150" stroke="#FFB800" stroke-width="0.5" />
 </svg> 

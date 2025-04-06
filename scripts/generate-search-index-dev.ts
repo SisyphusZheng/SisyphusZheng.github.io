@@ -21,20 +21,20 @@ interface SearchIndexItem {
 }
 
 async function generateSearchIndexDev() {
-  console.log("🔍 开始生成开发环境搜索索引...");
+  console.log("🔍 Generating development search index...");
   const indexItems: SearchIndexItem[] = [];
 
   try {
-    // 添加博客文章到索引
+    // Add blog posts to index
     const posts = await getAllPosts();
-    console.log(`📚 处理 ${posts.length} 篇博客文章`);
+    console.log(`📚 Processing ${posts.length} blog posts`);
 
     for (const post of posts) {
       indexItems.push({
         id: `blog-${post.slug}`,
         type: "blog",
         title: post.title,
-        content: post.content.slice(0, 100), // 开发环境只取前100个字符节省处理时间
+        content: post.content.slice(0, 100), // Only using first 100 chars for dev environment to save time
         tags: post.tags,
         date: post.date,
         url: `/blog/${post.slug}`,
@@ -42,9 +42,9 @@ async function generateSearchIndexDev() {
       });
     }
 
-    // 添加项目到索引
+    // Add projects to index
     const projects = getAllProjects();
-    console.log(`🏗️ 处理 ${projects.length} 个项目`);
+    console.log(`🏗️ Processing ${projects.length} projects`);
 
     for (const project of projects) {
       indexItems.push({
@@ -57,22 +57,22 @@ async function generateSearchIndexDev() {
       });
     }
 
-    // 确保static目录存在
+    // Ensure static directory exists
     await ensureDir("./static");
 
-    // 写入到静态目录
+    // Write to static directory
     const indexJson = JSON.stringify(indexItems);
     await Deno.writeTextFile("./static/search-index.json", indexJson);
 
     console.log(
-      `✅ 开发环境搜索索引生成完成！包含 ${indexItems.length} 个项目`
+      `✅ Development search index generated! Contains ${indexItems.length} items`
     );
   } catch (error) {
-    console.error("❌ 生成搜索索引出错:", error);
+    console.error("❌ Error generating search index:", error);
   }
 }
 
-// 执行生成
+// Execute generation
 if (import.meta.main) {
   await generateSearchIndexDev();
 }

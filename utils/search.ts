@@ -4,7 +4,7 @@ import { currentLocale, Locale } from "./i18n.ts";
 // import { getAllPosts } from "./blog.ts";
 // import { getAllProjects } from "./projects.ts";
 
-// 硬编码的示例博客数据，用于客户端搜索
+// Example blog data for client-side search
 const SAMPLE_BLOG_POSTS = [
   {
     title: "Hello World",
@@ -16,12 +16,12 @@ const SAMPLE_BLOG_POSTS = [
     locale: "en-US" as Locale,
   },
   {
-    title: "FreshPress 简介",
+    title: "FreshPress Introduction",
     slug: "freshpress-introduction",
     date: "2024-03-15",
     tags: ["Deno", "Fresh", "TypeScript", "FreshPress"],
     content:
-      "FreshPress是一个基于Fresh框架的现代静态站点生成器，旨在帮助开发者快速构建个人网站或博客。",
+      "FreshPress is a modern static site generator based on the Fresh framework, designed to help developers quickly build personal websites or blogs.",
     locale: "zh-CN" as Locale,
   },
   {
@@ -35,7 +35,7 @@ const SAMPLE_BLOG_POSTS = [
   },
 ];
 
-// 硬编码的示例项目数据
+// Example project data
 const SAMPLE_PROJECTS = [
   {
     title: "Personal Website",
@@ -61,79 +61,81 @@ export interface SearchResult {
   relevance?: number; // Search relevance score
 }
 
-// 搜索权重
+// Search weights
 const WEIGHTS = {
-  title: 5, // 标题权重
-  tags: 2, // 标签权重
-  content: 0, // 内容搜索已禁用
-  description: 0, // 描述搜索已禁用
+  title: 5, // Title weight
+  tags: 2, // Tag weight
+  content: 0, // Content search disabled
+  description: 0, // Description search disabled
 };
 
-// 索引缓存
+// Index cache
 let searchIndexCache: any[] | null = null;
 
-// 加载搜索索引
+// Load search index
 async function loadSearchIndex(): Promise<any[]> {
   if (searchIndexCache) {
     return searchIndexCache;
   }
 
   try {
-    console.log("📂 加载搜索索引文件...");
+    console.log("📂 Loading search index file...");
     const response = await fetch("/search-index.json");
     if (!response.ok) {
-      throw new Error(`加载搜索索引失败: ${response.status}`);
+      throw new Error(`Failed to load search index: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log(`✅ 加载完成, 包含 ${data.length} 个索引项`);
+    console.log(`✅ Loading complete, contains ${data.length} index items`);
     searchIndexCache = data;
     return data;
   } catch (error) {
-    console.error("❌ 加载搜索索引出错:", error);
+    console.error("❌ Error loading search index:", error);
     return [];
   }
 }
 
 /**
- * 搜索内容
- * @param query 搜索关键词
- * @param locale 可选的语言过滤
- * @returns 搜索结果数组
+ * Search content
+ * @param query Search keyword
+ * @param locale Optional language filter
+ * @returns Search results array
  */
 export async function searchContent(
   query: string,
   locale?: Locale
 ): Promise<SearchResult[]> {
   const results: SearchResult[] = [];
-  console.log(`开始搜索: "${query}", 语言: ${locale || "全部"}`);
+  console.log(`Starting search: "${query}", Language: ${locale || "all"}`);
 
   if (!query || query.trim().length < 2) {
-    console.log("搜索词太短，至少需要2个字符");
+    console.log("Search term too short, at least 2 characters required");
     return results;
   }
 
   const normalizedQuery = query.toLowerCase().trim();
   const currentLang = locale || currentLocale.value;
-  console.log(`处理搜索词: "${normalizedQuery}", 当前语言: ${currentLang}`);
+  console.log(
+    `Processing search term: "${normalizedQuery}", Current language: ${currentLang}`
+  );
 
   try {
-    // 加载索引
+    // Load index
     const searchIndex = await loadSearchIndex();
 
-    // 遍历索引项搜索
+    // Search through index items
     for (const item of searchIndex) {
-      // 调试输出
+      // Debug output
       console.log(
-        `检查项: ${item.title}, 类型: ${item.type}, 标签: ${(
+        `Checking item: ${item.title}, Type: ${item.type}, Tags: ${(
           item.tags || []
         ).join(", ")}`
       );
 
-      // 语言过滤
+      // Language filter
       if (locale && item.locale && item.locale !== locale) {
         console.log(
-          `跳过不匹配语言的项: ${item.title}, 项语言=${item.locale}, 搜索语言=${locale}`
+          `Skipping item with non-matching language: ${item.title}, Item language=${item.locale}, Search language=${locale}`
         );
         continue;
       }
@@ -141,14 +143,16 @@ export async function searchContent(
       let relevance = 0;
       let matchDetails = [];
 
-      // 标题匹配
+      // Title match
       if (item.title && item.title.toLowerCase().includes(normalizedQuery)) {
         relevance += WEIGHTS.title;
         matchDetails.push("title");
-        console.log(`项 "${item.title}" 标题匹配搜索词 "${normalizedQuery}"`);
+        console.log(
+          `Item "${item.title}" title matches search term "${normalizedQuery}"`
+        );
       }
 
-      // 标签匹配
+      // Tag match
       if (item.tags && Array.isArray(item.tags)) {
         const normalizedTags = item.tags.map((tag: string) =>
           typeof tag === "string" ? tag.toLowerCase() : ""
@@ -159,19 +163,23 @@ export async function searchContent(
         if (hasTagMatch) {
           relevance += WEIGHTS.tags;
           matchDetails.push("tags");
-          console.log(`项 "${item.title}" 标签匹配搜索词 "${normalizedQuery}"`);
+          console.log(
+            `Item "${item.title}" tags match search term "${normalizedQuery}"`
+          );
         }
       }
 
-      // 添加结果
+      // Add results
       if (relevance > 0) {
         console.log(
-          `项 "${
+          `Item "${
             item.title
-          }" 匹配成功, 相关度: ${relevance}, 匹配项: ${matchDetails.join(", ")}`
+          }" matched successfully, Relevance: ${relevance}, Matched in: ${matchDetails.join(
+            ", "
+          )}`
         );
 
-        // 提取匹配上下文作为摘要
+        // Extract context around match for excerpt
         let excerpt = "";
         if (item.content) {
           const contentLower = item.content.toLowerCase();
@@ -203,19 +211,21 @@ export async function searchContent(
           relevance,
         });
       } else {
-        console.log(`项 "${item.title}" 不匹配搜索词 "${normalizedQuery}"`);
+        console.log(
+          `Item "${item.title}" does not match search term "${normalizedQuery}"`
+        );
       }
     }
 
-    // 按相关性排序
+    // Sort by relevance
     results.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
 
-    console.log(`搜索完成. 找到 ${results.length} 个结果.`);
+    console.log(`Search completed. Found ${results.length} results.`);
 
-    // 返回前10个结果
+    // Return top 10 results
     return results.slice(0, 10);
   } catch (error) {
-    console.error("搜索出错:", error);
+    console.error("Search error:", error);
     return [];
   }
 }

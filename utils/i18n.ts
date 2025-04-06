@@ -305,7 +305,7 @@ export const translations: TranslationType = {
     },
     footer: {
       copyright: "版权所有",
-      poweredBy: "技术支持",
+      poweredBy: "由",
       socialLinks: "社交链接",
       links: {
         github: "GitHub",
@@ -518,7 +518,7 @@ export const translations: TranslationType = {
     },
     footer: {
       copyright: "Copyright",
-      poweredBy: "Powered By",
+      poweredBy: "Powered by",
       socialLinks: "Social Links",
       links: {
         github: "GitHub",

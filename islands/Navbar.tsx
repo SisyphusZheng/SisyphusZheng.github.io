@@ -67,8 +67,13 @@ export default function Navbar() {
           <div class="flex space-x-7">
             <div>
               <a href="/" class="flex items-center py-4">
+                <img
+                  src="/logo.svg"
+                  alt="FreshPress Logo"
+                  class="h-8 w-auto mr-2"
+                />
                 <span class="font-semibold text-gray-500 dark:text-gray-300 text-lg">
-                  {t("nav.home")}
+                  FreshPress
                 </span>
               </a>
             </div>
@@ -130,6 +135,9 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div class="md:hidden flex items-center space-x-4">
+            <a href="/" class="flex items-center">
+              <img src="/logo.svg" alt="FreshPress Logo" class="h-6 w-auto" />
+            </a>
             <ThemeToggle />
             <button class="outline-none" onClick={toggleMenu}>
               <svg

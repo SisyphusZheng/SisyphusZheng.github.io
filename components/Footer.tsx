@@ -134,7 +134,19 @@ export default function Footer() {
         <div class="pt-8 mt-8 border-t border-gray-700 text-center sm:text-left">
           <p class="text-gray-400 text-sm">{copyright}</p>
           <p class="text-gray-400 text-sm mt-2">
-            {getContent(["footer", "poweredBy"])}
+            {getContent(["footer", "poweredBy"])}{" "}
+            <a
+              href="https://fresh.deno.dev"
+              class="text-gray-300 hover:text-white inline-flex items-center"
+            >
+              <span class="mr-1">Fresh</span>
+              <img
+                src="https://fresh.deno.dev/fresh-badge.svg"
+                alt="Made with Fresh"
+                width="18"
+                height="18"
+              />
+            </a>
           </p>
         </div>
       </div>
