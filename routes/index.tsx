@@ -2,95 +2,82 @@ import { Handlers } from "$fresh/server.ts";
 import Layout from "../components/Layout.tsx";
 import Hero from "../components/Hero.tsx";
 import { siteConfig } from "../data/config.ts";
-
-interface Post {
-  slug: string;
-  title: string;
-  date: string;
-  tags: string[];
-  content: string;
-}
+import { getAllPosts, Post } from "../utils/blog.ts";
+import {
+  getContent,
+  getFeatures,
+  getQuickStartSteps,
+  getChangelogVersions,
+} from "../utils/content.ts";
+import { currentLocale } from "../utils/i18n.ts";
 
 export const handler: Handlers = {
   async GET(_req, ctx) {
     // 读取最近的博客文章
-    const posts: Post[] = [];
-    for await (const dirEntry of Deno.readDir("./blog")) {
-      if (dirEntry.isFile && dirEntry.name.endsWith(".md")) {
-        const file = await Deno.readTextFile(`./blog/${dirEntry.name}`);
-        const { attrs, body } = parseFrontMatter(file);
-        posts.push({
-          slug: dirEntry.name.replace(".md", ""),
-          title: attrs.title || "未命名文章",
-          date: attrs.date || new Date().toISOString(),
-          tags: attrs.tags ? attrs.tags.split(",").map((tag: string) => tag.trim()) : [],
-          content: body,
-        });
-      }
-    }
+    const posts = await getAllPosts();
+
     // 按日期排序，获取最新的文章
-    const latestPost = posts.sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    )[0];
+    const latestPost = posts[0]; // getAllPosts已经按日期排序了
 
     // 获取最新的项目
     const latestProject = siteConfig.projects.items[0];
 
-    return ctx.render({ latestPost, latestProject });
+    // 获取功能列表
+    const features = getFeatures();
+
+    // 获取快速开始步骤
+    const quickStartSteps = getQuickStartSteps();
+
+    // 获取更新日志
+    const changelogVersions = getChangelogVersions();
+
+    return ctx.render({
+      latestPost,
+      latestProject,
+      features,
+      quickStartSteps,
+      changelogVersions,
+    });
   },
 };
 
-function parseFrontMatter(content: string): { attrs: Record<string, any>; body: string } {
-  const lines = content.split("\n");
-  const attrs: Record<string, any> = {};
-  let body = content;
-  let inFrontMatter = false;
+export default function Home({
+  data,
+}: {
+  data: {
+    latestPost: Post;
+    latestProject: any;
+    features: any[];
+    quickStartSteps: any[];
+    changelogVersions: any[];
+  };
+}) {
+  const {
+    latestPost,
+    latestProject,
+    features,
+    quickStartSteps,
+    changelogVersions,
+  } = data;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line === "---") {
-      if (!inFrontMatter) {
-        inFrontMatter = true;
-        continue;
-      } else {
-        body = lines.slice(i + 1).join("\n");
-        break;
-      }
-    }
-
-    if (inFrontMatter) {
-      const [key, ...values] = line.split(":");
-      if (key && values.length > 0) {
-        const value = values.join(":").trim();
-        attrs[key.trim()] = value.replace(/^['"]|['"]$/g, "");
-      }
-    }
-  }
-
-  return { attrs, body };
-}
-
-export default function Home({ data }: { data: { latestPost: Post; latestProject: any } }) {
-  const { latestPost, latestProject } = data;
-  
   return (
     <Layout>
       <Hero />
-      
-      {/* 技能展示区域 */}
-      <section class="py-16 bg-gradient-to-b from-gray-50 to-white">
+
+      {/* 主要特性展示 */}
+      <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
-            {siteConfig.skills.title}
+            {getContent(["features", "title"])}
           </h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {siteConfig.skills.items.map((skill, index) => (
-              <div 
-                class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div class="text-4xl mb-4">{skill.icon}</div>
-                <h3 class="text-xl font-semibold">{skill.name}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="text-4xl mb-4 text-blue-500">{feature.icon}</div>
+                <h3 class="text-xl font-semibold mb-3">{feature.title}</h3>
+                <p class="text-gray-600 dark:text-gray-300">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -98,105 +85,122 @@ export default function Home({ data }: { data: { latestPost: Post; latestProject
       </section>
 
       {/* 最新动态 */}
-      <section class="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section class="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
-            {siteConfig.news.title}
+            {getContent(["news", "title"])}
           </h2>
           <div class="grid md:grid-cols-2 gap-8">
             {/* 最新博客文章 */}
-            <div class="bg-white p-6 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
-              <h3 class="text-xl font-semibold mb-4">{siteConfig.news.items[0].title}</h3>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+              <h3 class="text-xl font-semibold mb-4">
+                <span class="text-blue-500">📰</span>{" "}
+                {getContent(["news", "blog", "title"])}
+              </h3>
               {latestPost ? (
                 <>
                   <h4 class="text-lg font-medium mb-2">
-                    <a href={`/blog/${latestPost.slug}`} class="text-blue-600 hover:text-blue-800">
+                    <a
+                      href={`/blog/${latestPost.slug}`}
+                      class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                    >
                       {latestPost.title}
                     </a>
                   </h4>
-                  <p class="text-gray-500 mb-2">
-                    {new Date(latestPost.date).toLocaleDateString()}
+                  <p class="text-gray-500 dark:text-gray-400 mb-2">
+                    {new Date(latestPost.date).toLocaleDateString(
+                      currentLocale.value === "zh-CN" ? "zh-CN" : "en-US",
+                      { year: "numeric", month: "short", day: "numeric" }
+                    )}
                   </p>
-                  <p class="text-gray-600 mb-4">
-                    {latestPost.content.split("\n")[0]}
+                  <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    {latestPost.description ||
+                      latestPost.content.split("\n")[0]}
                   </p>
                   <a
                     href={`/blog/${latestPost.slug}`}
-                    class="text-blue-600 hover:text-blue-800 inline-flex items-center"
+                    class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
                   >
-                    {siteConfig.news.items[0].linkText}
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    {getContent(["news", "blog", "readMore"])}
+                    <svg
+                      class="w-4 h-4 ml-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </a>
                 </>
               ) : (
-                <p class="text-gray-600">暂无博客文章</p>
+                <p class="text-gray-600 dark:text-gray-300">暂无博客文章</p>
               )}
             </div>
 
-            {/* 最新项目 */}
-            <div class="bg-white p-6 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
-              <h3 class="text-xl font-semibold mb-4">{siteConfig.news.items[1].title}</h3>
-              {latestProject ? (
-                <>
-                  <h4 class="text-lg font-medium mb-2">
-                    <a href={latestProject.link} class="text-blue-600 hover:text-blue-800" target="_blank">
-                      {latestProject.title}
-                    </a>
-                  </h4>
-                  <p class="text-gray-600 mb-4">
-                    {latestProject.description}
-                  </p>
-                  <div class="flex flex-wrap gap-2 mb-4">
-                    {latestProject.tags.map((tag: string) => (
-                      <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                        {tag}
-                      </span>
-                    ))}
+            {/* 更新日志 */}
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+              <h3 class="text-xl font-semibold mb-4">
+                <span class="text-blue-500">📋</span>{" "}
+                {getContent(["news", "updates", "title"])}
+              </h3>
+              <div class="space-y-4">
+                {changelogVersions.map((version) => (
+                  <div>
+                    <h4 class="text-lg font-medium mb-1">{version.version}</h4>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-2">
+                      {version.date}
+                    </p>
+                    <ul class="text-gray-600 dark:text-gray-300 text-sm list-disc pl-5 space-y-1">
+                      {version.changes.map((change: string) => (
+                        <li>{change}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <a
-                    href={latestProject.link}
-                    class="text-blue-600 hover:text-blue-800 inline-flex items-center"
-                    target="_blank"
-                  >
-                    {siteConfig.news.items[1].linkText}
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </a>
-                </>
-              ) : (
-                <p class="text-gray-600">暂无项目</p>
-              )}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 统计数据 */}
-      <section class="py-16 bg-gradient-to-b from-gray-50 to-white">
+      {/* 快速开始 */}
+      <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
-              <div class="text-4xl font-bold text-blue-600 mb-2">240K+</div>
-              <p class="text-gray-600">博客浏览量</p>
+          <h2 class="text-3xl font-bold text-center mb-8 animate-fade-in">
+            {getContent(["quickStart", "title"])}
+          </h2>
+          <p class="text-center text-lg mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-300">
+            {getContent(["quickStart", "subtitle"])}
+          </p>
+
+          {quickStartSteps.map((step) => (
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 mb-8">
+              <h3 class="text-xl font-semibold mb-4">{step.title}</h3>
+              <div class="bg-gray-800 text-gray-200 p-4 rounded-md font-mono text-sm overflow-x-auto">
+                <code>{step.code}</code>
+              </div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
-              <div class="text-4xl font-bold text-blue-600 mb-2">1K+</div>
-              <p class="text-gray-600">博客粉丝</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
-              <div class="text-4xl font-bold text-blue-600 mb-2">7</div>
-              <p class="text-gray-600">社区收录文章</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-md text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in-up">
-              <div class="text-4xl font-bold text-blue-600 mb-2">2</div>
-              <p class="text-gray-600">开源项目</p>
-            </div>
+          ))}
+
+          <div class="text-center mt-12">
+            <a
+              href={getContent(["quickStart", "cta", "link"])}
+              class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
+              target="_blank"
+            >
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              {getContent(["quickStart", "cta", "text"])}
+            </a>
           </div>
         </div>
       </section>
     </Layout>
   );
-} 
+}

@@ -1,0 +1,312 @@
+{
+  "zh-CN": {
+    "site": {
+      "title": "FreshPress",
+      "description": "基于Fresh框架的现代静态站点生成器",
+      "author": "FreshPress Team",
+      "email": "freshpress@example.com",
+      "github": "github.com/freshpress/freshpress"
+    },
+    "nav": {
+      "home": "首页",
+      "blog": "博客",
+      "projects": "项目",
+      "resume": "简历",
+      "about": "关于"
+    },
+    "hero": {
+      "title": "FreshPress",
+      "subtitle": "基于Fresh的现代静态站点生成器，快速构建你的网站",
+      "buttons": {
+        "blog": "浏览博客",
+        "projects": "查看项目"
+      }
+    },
+    "features": {
+      "title": "主要特性",
+      "items": [
+        {
+          "icon": "🚀",
+          "title": "现代化架构",
+          "description": "基于Deno和Fresh框架，使用岛屿架构（Islands Architecture）实现高性能渲染，最小化客户端JavaScript。"
+        },
+        {
+          "icon": "🌏",
+          "title": "多语言支持",
+          "description": "内置国际化系统，轻松支持多语言内容，自动根据用户语言设置切换显示内容。"
+        },
+        {
+          "icon": "🔍",
+          "title": "智能搜索",
+          "description": "全文搜索功能，支持搜索博客文章、项目和其他内容，根据相关性排序结果。"
+        },
+        {
+          "icon": "📝",
+          "title": "Markdown增强",
+          "description": "支持代码高亮、自动目录生成、自定义组件等Markdown增强功能，让内容展示更丰富。"
+        },
+        {
+          "icon": "🎨",
+          "title": "主题系统",
+          "description": "基于CSS变量的主题系统，支持亮色和暗色模式，可自定义网站风格和颜色方案。"
+        },
+        {
+          "icon": "⚡",
+          "title": "静态站点生成",
+          "description": "支持完全静态化生成，部署到任何静态托管服务，同时保留服务端功能。"
+        }
+      ]
+    },
+    "news": {
+      "title": "最新动态",
+      "blog": {
+        "title": "最新博客",
+        "readMore": "阅读更多"
+      },
+      "updates": {
+        "title": "更新日志",
+        "versions": [
+          {
+            "version": "v0.2.0",
+            "date": "2024-04-07",
+            "changes": [
+              "添加暗色主题支持",
+              "增强Markdown渲染功能",
+              "完整的静态站点生成支持",
+              "修复多语言显示问题"
+            ]
+          },
+          {
+            "version": "v0.1.0",
+            "date": "2024-03-21",
+            "changes": [
+              "初始项目设置",
+              "基本博客功能实现",
+              "项目展示页面",
+              "响应式设计支持"
+            ]
+          }
+        ]
+      }
+    },
+    "quickStart": {
+      "title": "快速开始",
+      "subtitle": "只需几步，即可创建您自己的FreshPress网站",
+      "steps": [
+        {
+          "title": "1. 克隆仓库",
+          "code": "git clone https://github.com/username/freshpress.git my-website"
+        },
+        {
+          "title": "2. 启动开发服务器",
+          "code": "cd my-website\ndeno task start"
+        },
+        {
+          "title": "3. 创建内容",
+          "code": "# 在blog目录下创建Markdown文件\ntouch blog/my-first-post.md"
+        }
+      ],
+      "cta": {
+        "text": "GitHub仓库",
+        "link": "https://github.com/username/freshpress"
+      }
+    },
+    "blog": {
+      "title": "博客文章",
+      "description": "分享技术心得和项目经验",
+      "searchPlaceholder": "搜索文章...",
+      "allTags": "全部",
+      "readMore": "阅读更多 →",
+      "noPosts": "没有找到匹配的文章",
+      "pagination": {
+        "previous": "上一页",
+        "next": "下一页",
+        "pageInfo": "第 {current} 页，共 {total} 页"
+      }
+    },
+    "projects": {
+      "title": "项目展示",
+      "description": "FreshPress团队开发的开源项目"
+    },
+    "search": {
+      "placeholder": "搜索文章和项目...",
+      "noResults": "未找到相关结果",
+      "searching": "搜索中...",
+      "blog": "博客",
+      "project": "项目",
+      "type": "类型",
+      "title": "标题",
+      "tags": "标签",
+      "date": "日期",
+      "all": "全部",
+      "recentSearches": "最近搜索",
+      "clearHistory": "清除历史",
+      "pressToSearch": "输入关键词搜索"
+    },
+    "footer": {
+      "copyright": "© {year} FreshPress 团队。保留所有权利。",
+      "poweredBy": "由 Fresh 和 Deno 强力驱动",
+      "links": {
+        "github": "GitHub",
+        "twitter": "Twitter",
+        "discord": "Discord",
+        "docs": "文档"
+      }
+    }
+  },
+  "en-US": {
+    "site": {
+      "title": "FreshPress",
+      "description": "A modern static site generator based on Fresh framework",
+      "author": "FreshPress Team",
+      "email": "freshpress@example.com",
+      "github": "github.com/freshpress/freshpress"
+    },
+    "nav": {
+      "home": "Home",
+      "blog": "Blog",
+      "projects": "Projects",
+      "resume": "Resume",
+      "about": "About"
+    },
+    "hero": {
+      "title": "FreshPress",
+      "subtitle": "A modern static site generator based on Fresh framework, build your website fast",
+      "buttons": {
+        "blog": "Browse Blog",
+        "projects": "View Projects"
+      }
+    },
+    "features": {
+      "title": "Key Features",
+      "items": [
+        {
+          "icon": "🚀",
+          "title": "Modern Architecture",
+          "description": "Based on Deno and Fresh framework, using Islands Architecture for high-performance rendering with minimal client-side JavaScript."
+        },
+        {
+          "icon": "🌏",
+          "title": "Multilingual Support",
+          "description": "Built-in internationalization system, easily support multilingual content, automatically switch display content according to user language settings."
+        },
+        {
+          "icon": "🔍",
+          "title": "Smart Search",
+          "description": "Full-text search functionality, support searching blog posts, projects and other content, sorting results by relevance."
+        },
+        {
+          "icon": "📝",
+          "title": "Enhanced Markdown",
+          "description": "Support for code highlighting, automatic table of contents generation, custom components and other Markdown enhancements for richer content presentation."
+        },
+        {
+          "icon": "🎨",
+          "title": "Theme System",
+          "description": "CSS variable-based theme system, supporting light and dark modes, customizable website styles and color schemes."
+        },
+        {
+          "icon": "⚡",
+          "title": "Static Site Generation",
+          "description": "Support for fully static generation, deployment to any static hosting service, while retaining server-side functionality."
+        }
+      ]
+    },
+    "news": {
+      "title": "Latest Updates",
+      "blog": {
+        "title": "Latest Blog",
+        "readMore": "Read More"
+      },
+      "updates": {
+        "title": "Changelog",
+        "versions": [
+          {
+            "version": "v0.2.0",
+            "date": "2024-04-07",
+            "changes": [
+              "Added dark theme support",
+              "Enhanced Markdown rendering",
+              "Complete static site generation support",
+              "Fixed multilingual display issues"
+            ]
+          },
+          {
+            "version": "v0.1.0",
+            "date": "2024-03-21",
+            "changes": [
+              "Initial project setup",
+              "Basic blog functionality",
+              "Project showcase page",
+              "Responsive design support"
+            ]
+          }
+        ]
+      }
+    },
+    "quickStart": {
+      "title": "Quick Start",
+      "subtitle": "Just a few steps to create your own FreshPress website",
+      "steps": [
+        {
+          "title": "1. Clone Repository",
+          "code": "git clone https://github.com/username/freshpress.git my-website"
+        },
+        {
+          "title": "2. Start Development Server",
+          "code": "cd my-website\ndeno task start"
+        },
+        {
+          "title": "3. Create Content",
+          "code": "# Create Markdown files in the blog directory\ntouch blog/my-first-post.md"
+        }
+      ],
+      "cta": {
+        "text": "GitHub Repository",
+        "link": "https://github.com/username/freshpress"
+      }
+    },
+    "blog": {
+      "title": "Blog Posts",
+      "description": "Share technical insights and project experiences",
+      "searchPlaceholder": "Search articles...",
+      "allTags": "All",
+      "readMore": "Read More →",
+      "noPosts": "No matching articles found",
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "pageInfo": "Page {current} of {total}"
+      }
+    },
+    "projects": {
+      "title": "Project Showcase",
+      "description": "Open source projects developed by the FreshPress team"
+    },
+    "search": {
+      "placeholder": "Search articles and projects...",
+      "noResults": "No relevant results found",
+      "searching": "Searching...",
+      "blog": "Blog",
+      "project": "Project",
+      "type": "Type",
+      "title": "Title",
+      "tags": "Tags",
+      "date": "Date",
+      "all": "All",
+      "recentSearches": "Recent Searches",
+      "clearHistory": "Clear History",
+      "pressToSearch": "Enter keywords to search"
+    },
+    "footer": {
+      "copyright": "© {year} FreshPress Team. All rights reserved.",
+      "poweredBy": "Powered by Fresh and Deno",
+      "links": {
+        "github": "GitHub",
+        "twitter": "Twitter",
+        "discord": "Discord",
+        "docs": "Documentation"
+      }
+    }
+  }
+}

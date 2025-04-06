@@ -4,26 +4,26 @@ date: "2024-03-20"
 tags: "Deno, Fresh, TypeScript"
 ---
 
-这是我的第一篇博客文章。在这篇文章中，我将介绍如何使用 Deno 和 Fresh 框架构建个人网站。
+This is my first blog post. In this article, I will introduce how to build a personal website using Deno and the Fresh framework.
 
-## 为什么选择 Deno 和 Fresh？
+## Why Choose Deno and Fresh?
 
-Deno 是一个现代的 JavaScript/TypeScript 运行时，它提供了许多内置功能，如 TypeScript 支持、ES 模块和安全性。Fresh 是一个基于 Deno 的全栈 Web 框架，它提供了服务器端渲染、零配置和即时热更新等功能。
+Deno is a modern JavaScript/TypeScript runtime that provides many built-in features such as TypeScript support, ES modules, and security. Fresh is a full-stack web framework based on Deno that offers server-side rendering, zero configuration, and instant hot updates.
 
-## 开始使用
+## Getting Started
 
-要开始使用 Deno 和 Fresh，首先需要安装 Deno：
+To start using Deno and Fresh, you first need to install Deno:
 
 ```bash
 curl -fsSL https://deno.land/x/install/install.sh | sh
 ```
 
-然后，可以使用 Fresh 的脚手架工具创建一个新项目：
+Then, you can create a new project using Fresh's scaffolding tool:
 
 ```bash
 deno run -A -r https://fresh.deno.dev my-website
 ```
 
-## 总结
+## Summary
 
-Deno 和 Fresh 是一个强大的组合，可以帮助我们快速构建现代化的 Web 应用。它们提供了许多开箱即用的功能，让我们可以专注于业务逻辑而不是配置。
+Deno and Fresh are a powerful combination that can help us quickly build modern web applications. They provide many out-of-the-box features that allow us to focus on business logic rather than configuration.

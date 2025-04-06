@@ -1,6 +1,8 @@
 import { Head } from "$fresh/runtime.ts";
 import Navbar from "../islands/Navbar.tsx";
 import Footer from "./Footer.tsx";
+import { t } from "../utils/i18n.ts";
+import { siteConfig } from "../data/config.ts";
 
 interface LayoutProps {
   children: preact.ComponentChildren;
@@ -8,23 +10,58 @@ interface LayoutProps {
   description?: string;
 }
 
-export default function Layout({ children, title = "个人博客", description = "分享技术心得和项目经验" }: LayoutProps) {
+export default function Layout({
+  children,
+  title = siteConfig.site.title,
+  description = siteConfig.site.description,
+}: LayoutProps) {
+  const pageTitle =
+    title === siteConfig.site.title
+      ? title
+      : `${title} | ${siteConfig.site.title}`;
+
   return (
     <>
       <Head>
-        <title>{title}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={description} />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content={siteConfig.site.author} />
+        <meta name="generator" content="FreshPress" />
         <link rel="stylesheet" href="/styles.css" />
+        <link
+          rel="stylesheet"
+          href="/css/themes/default.css"
+          id="theme-default"
+        />
+        <link
+          rel="stylesheet"
+          href="/css/themes/dark.css"
+          id="theme-dark"
+          media="(prefers-color-scheme: dark)"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            // 检测系统暗色模式
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // 读取用户设置
+            const savedTheme = localStorage.getItem('theme');
+            
+            // 应用主题
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+              document.documentElement.classList.add('dark');
+            }
+          `,
+          }}
+        />
       </Head>
       <div class="min-h-screen flex flex-col">
         <Navbar />
-        <main class="flex-grow">
-          {children}
-        </main>
+        <main class="flex-grow">{children}</main>
         <Footer />
       </div>
     </>
   );
-} 
+}

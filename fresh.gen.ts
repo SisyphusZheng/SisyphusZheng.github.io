@@ -2,22 +2,28 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $about from "./routes/about.tsx";
 import * as $blog_slug_ from "./routes/blog/[slug].tsx";
 import * as $blog_index from "./routes/blog/index.tsx";
 import * as $index from "./routes/index.tsx";
+import * as $markdown_demo from "./routes/markdown-demo.tsx";
 import * as $projects_slug_ from "./routes/projects/[slug].tsx";
 import * as $projects_index from "./routes/projects/index.tsx";
 import * as $resume from "./routes/resume.tsx";
 import * as $BlogList from "./islands/BlogList.tsx";
 import * as $Navbar from "./islands/Navbar.tsx";
 import * as $Search from "./islands/Search.tsx";
+import * as $ThemeToggle from "./islands/ThemeToggle.tsx";
+import * as $components_MarkdownRenderer from "./islands/components/MarkdownRenderer.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/about.tsx": $about,
     "./routes/blog/[slug].tsx": $blog_slug_,
     "./routes/blog/index.tsx": $blog_index,
     "./routes/index.tsx": $index,
+    "./routes/markdown-demo.tsx": $markdown_demo,
     "./routes/projects/[slug].tsx": $projects_slug_,
     "./routes/projects/index.tsx": $projects_index,
     "./routes/resume.tsx": $resume,
@@ -26,6 +32,8 @@ const manifest = {
     "./islands/BlogList.tsx": $BlogList,
     "./islands/Navbar.tsx": $Navbar,
     "./islands/Search.tsx": $Search,
+    "./islands/ThemeToggle.tsx": $ThemeToggle,
+    "./islands/components/MarkdownRenderer.tsx": $components_MarkdownRenderer,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

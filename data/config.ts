@@ -1,264 +1,274 @@
 export const siteConfig = {
-  // 站点基本信息
+  // Site basic information
   site: {
-    title: "郑治的个人网站",
-    description: "一名热爱技术的前端开发者",
-    author: "郑治",
-    email: "example@example.com",
-    github: "github.com/yourusername",
+    title: "FreshPress",
+    description: "Modern static site generator based on Fresh framework",
+    author: "FreshPress Team",
+    email: "freshpress@example.com",
+    github: "github.com/freshpress/freshpress",
   },
 
-  // 导航菜单
+  // Navigation menu
   nav: {
-    home: "首页",
-    blog: "博客",
-    projects: "项目",
-    resume: "简历",
+    home: "Home",
+    blog: "Blog",
+    projects: "Projects",
+    resume: "Resume",
+    about: "About",
   },
 
-  // Hero 部分
+  // Hero section
   hero: {
-    title: "你好，我是郑治",
-    subtitle: "一名热爱技术的前端开发者",
+    title: "FreshPress",
+    subtitle:
+      "Modern static site generator based on Fresh, build your website quickly",
     buttons: {
-      blog: "查看博客",
-      projects: "查看项目",
+      blog: "Browse Blog",
+      projects: "View Projects",
     },
   },
 
-  // 技能部分
+  // Skills section
   skills: {
-    title: "技术栈",
+    title: "Tech Stack",
     items: [
-      { name: "TypeScript", icon: "⚡" },
-      { name: "React", icon: "⚛️" },
-      { name: "Node.js", icon: "🟢" },
       { name: "Deno", icon: "🦕" },
+      { name: "Fresh", icon: "🍋" },
+      { name: "TypeScript", icon: "⚡" },
       { name: "TailwindCSS", icon: "🎨" },
-      { name: "PostgreSQL", icon: "🐘" },
-      { name: "Docker", icon: "🐳" },
-      { name: "Git", icon: "📦" },
+      { name: "Preact", icon: "⚛️" },
+      { name: "Markdown", icon: "📝" },
+      { name: "Static Site", icon: "📦" },
+      { name: "SEO", icon: "🔍" },
     ],
   },
 
-  // 最新动态
+  // Latest updates
   news: {
-    title: "最新动态",
+    title: "Latest Updates",
     items: [
       {
-        title: "博客更新",
-        description: "最近更新了关于 Deno 和 Fresh 框架的技术文章，分享了一些实用的开发经验。",
+        title: "Blog Update",
+        description:
+          "Published a tutorial series on how to build static websites with FreshPress.",
         link: "/blog",
-        linkText: "阅读更多 →",
+        linkText: "Read More →",
       },
       {
-        title: "项目进展",
-        description: "正在开发一个基于 Fresh 的个人网站，集成了博客和项目展示功能。",
+        title: "Project Progress",
+        description:
+          "FreshPress 1.0.0 version has been released, supporting multilingual and enhanced search functionality.",
         link: "/projects",
-        linkText: "查看详情 →",
+        linkText: "View Details →",
       },
     ],
   },
 
-  // 博客相关
+  // Blog related
   blog: {
-    title: "博客文章",
-    description: "分享技术心得和项目经验",
-    searchPlaceholder: "搜索文章...",
-    allTags: "全部",
-    readMore: "阅读更多 →",
-    noPosts: "没有找到匹配的文章",
+    title: "Blog Posts",
+    description: "Sharing technical insights and project experiences",
+    searchPlaceholder: "Search articles...",
+    allTags: "All",
+    readMore: "Read More →",
+    noPosts: "No matching articles found",
     pagination: {
-      previous: "上一页",
-      next: "下一页",
-      pageInfo: "第 {current} 页，共 {total} 页",
+      previous: "Previous",
+      next: "Next",
+      pageInfo: "Page {current} of {total}",
     },
   },
 
-  // 项目相关
+  // Projects related
   projects: {
-    title: "项目展示",
-    description: "展示我的个人项目和开源贡献",
+    title: "Project Showcase",
+    description: "Open source projects developed by the FreshPress team",
     items: [
       {
-        title: "个人网站",
-        description: "使用 Fresh 框架构建的个人网站，包含博客和项目展示功能。",
-        tags: ["Deno", "Fresh", "TypeScript"],
-        link: "https://github.com/yourusername/personal-website",
+        title: "FreshPress",
+        description: "Modern static site generator based on Fresh framework",
+        link: "https://github.com/freshpress/freshpress",
+        image: "/images/projects/freshpress.png",
+        tags: ["Deno", "Fresh", "TypeScript", "TailwindCSS"],
       },
       {
-        title: "在线工具",
-        description: "一个实用的在线工具集合，包含各种常用功能。",
-        tags: ["React", "TypeScript", "TailwindCSS"],
-        link: "https://github.com/yourusername/online-tools",
+        title: "Fresh Blog Starter",
+        description: "Blog starter template built with Fresh framework",
+        link: "https://github.com/freshpress/blog-starter",
+        image: "/images/projects/blog-starter.png",
+        tags: ["Deno", "Fresh", "Markdown", "Blog"],
+      },
+      {
+        title: "Fresh i18n",
+        description: "Internationalization plugin for Fresh framework",
+        link: "https://github.com/freshpress/fresh-i18n",
+        image: "/images/projects/i18n.png",
+        tags: ["Deno", "Fresh", "i18n", "Plugin"],
+      },
+      {
+        title: "Fresh Search",
+        description: "Powerful search functionality for Fresh framework",
+        link: "https://github.com/freshpress/fresh-search",
+        image: "/images/projects/search.png",
+        tags: ["Deno", "Fresh", "Search", "Plugin"],
       },
     ],
   },
 
-  // 简历相关
+  // Resume related
   resume: {
-    title: "个人简历",
+    title: "Developer Resume",
     sections: {
       basicInfo: {
-        title: "基本信息",
+        title: "Basic Information",
         items: {
-          name: "郑治",
-          education: "软件工程 硕士",
-          status: "在校",
-          email: "zhizheng@z-js.dev",
-          phone: "13370765023",
-          github: "SisyphusZheng",
-          devto: "SisyphusZheng"
-        }
+          name: "FreshPress Developer",
+          education: "Bachelor of Computer Science",
+          status: "Full-time",
+          email: "dev@freshpress.dev",
+          phone: "+86 123 4567 8910",
+          github: "github.com/freshpress",
+        },
       },
       education: {
-        title: "教育背景",
+        title: "Education Background",
         items: [
           {
-            school: "爱尔兰利莫瑞克大学",
-            degree: "软件工程 硕士",
-            period: "2023-2026",
+            school: "Well-known University",
+            degree: "Computer Science and Technology, Bachelor's Degree",
+            period: "2018 - 2022",
             courses: [
-              "软件质量",
-              "软件进化",
-              "HCI(人机交互)",
-              "项目管理",
-              "软件架构"
-            ]
+              "Web Frontend Development",
+              "Full-stack Application Development",
+              "Data Structures and Algorithms",
+              "AI Fundamentals",
+            ],
           },
-          {
-            school: "重庆大学城市科技学院",
-            degree: "软件工程 本科",
-            period: "2018-2022",
-            courses: [
-              "编程技术 92%",
-              "算法分析 97%",
-              "Linux 基础 91%",
-              "高级编程技术 91%"
-            ]
-          }
-        ]
+        ],
       },
       skills: {
-        title: "技术栈",
+        title: "Technical Skills",
         categories: {
           frontend: {
-            title: "前端方向",
+            title: "Frontend Development",
             items: [
+              "HTML",
+              "CSS",
+              "JavaScript",
               "TypeScript",
-              "React Hooks",
-              "函数式组件开发",
+              "React",
+              "Vue",
               "TailwindCSS",
-              "Web Components",
-              "StencilJS"
-            ]
+            ],
           },
           backend: {
-            title: "后端方向",
-            items: [
-              "Node.js",
-              "Express",
-              "MongoDB",
-              "RESTful API",
-              "JWT",
-              "OAuth"
-            ]
+            title: "Backend Development",
+            items: ["Node.js", "Deno", "Express", "Fresh", "RESTful API"],
           },
-          engineering: {
-            title: "工程化方向",
-            items: [
-              "Monorepo",
-              "Git Flow",
-              "GitHub Actions",
-              "Docker",
-              "Vite",
-              "Nginx"
-            ]
-          }
-        }
+          tools: {
+            title: "Development Tools",
+            items: ["Git", "VS Code", "Docker", "CI/CD", "Webpack", "Vite"],
+          },
+        },
       },
       projects: {
-        title: "项目经验",
+        title: "Project Experience",
         items: [
           {
-            name: "组件库",
-            url: "https://air.js.org",
-            description: "基于 StencilJS 与 TailwindCSS 构建的现代化 Web Components 组件库，收录于 Stencil Community 官方生态。",
+            name: "FreshPress",
+            url: "https://github.com/freshpress/freshpress",
+            description:
+              "Modern static site generator based on Fresh framework",
             highlights: [
-              "采用 Figma 进行 UI/UX 设计",
-              "GitHub Actions 配置 CI/CD",
-              "Jest 单元测试与组件快照测试"
-            ]
+              "Developed a high-performance static site generation system",
+              "Implemented multi-language support and full-text search",
+              "Optimized SEO and page loading performance",
+              "Enhanced developer experience and documentation system",
+            ],
           },
           {
-            name: "实时聊天应用",
-            url: "https://cchat.chat",
-            description: "基于 MERN 技术栈开发的即时通讯系统。",
+            name: "Fresh Blog Template",
+            url: "https://github.com/freshpress/blog-starter",
+            description: "Blog starter template based on Fresh",
             highlights: [
-              "GitHub OAuth 2.0 认证",
-              "Socket.io 实时消息传输",
-              "亮/暗双主题切换",
-              "JWT 身份验证"
-            ]
-          }
-        ]
+              "Designed an easy-to-use blog template system",
+              "Developed article management and tag categorization features",
+              "Implemented responsive design and theme customization",
+              "Integrated comment system and social sharing functionality",
+            ],
+          },
+        ],
       },
       experience: {
-        title: "校园经历",
+        title: "Work Experience",
         items: [
           {
-            organization: "利莫瑞克大学计算机社团",
-            position: "成员",
-            period: "2023-09 ~ 2025-01",
+            organization: "Tech Company",
+            position: "Frontend Developer",
+            period: "2022 - Present",
             highlights: [
-              "欧洲 PythonCon 会议志愿者",
-              "IrlCPC(爱尔兰程序设计)2024 集训"
-            ]
+              "Led the development of multiple enterprise web applications",
+              "Optimized frontend architecture and build processes",
+              "Improved team code quality and test coverage",
+              "Mentored junior developers and interns",
+            ],
           },
           {
-            organization: "学院软件社团与计算机社团",
-            position: "软社社长,计社部长",
-            period: "2020-09 ~ 2021-06",
+            organization: "Startup Company",
+            position: "Web Development Intern",
+            period: "2021 - 2022",
             highlights: [
-              "协助教研室 CCPC&蓝桥杯集训",
-              "校内赛 WebDev 培训"
-            ]
-          }
-        ]
+              "Participated in frontend development of main company products",
+              "Implemented multiple UI components and page features",
+              "Assisted in optimizing website performance and user experience",
+              "Participated in code reviews and technical discussions",
+            ],
+          },
+        ],
       },
       achievements: {
-        title: "荣誉证书",
+        title: "Honors and Certificates",
         items: [
-          "爱尔兰利莫瑞克大学优秀硕士录取奖学金",
-          "重庆市优秀毕业生",
-          "第九届 CCPC 重庆市三等奖",
-          "重庆城市科技学院优秀毕业生",
-          "重庆城市科技学院优秀学共青团干与学干",
-          "重庆城市科技学院综测奖学金"
-        ]
+          "First Prize in Programming Competition (2021)",
+          "Outstanding Graduate (2022)",
+          "Annual Contributor in Technical Community (2023)",
+        ],
       },
       contributions: {
-        title: "开源贡献",
+        title: "Open Source Contributions",
         items: [
-          "PR#2828 合并到 OpenWebComponent 项目，修复路由模块兼容性问题，优化工具链"
-        ]
+          "Fresh Framework: Contributed multiple features and fixed several issues",
+          "Popular Frontend Library: Implemented new features and optimized performance",
+          "Development Tool: Added new features and improved documentation",
+        ],
       },
       blog: {
-        title: "技术博客",
+        title: "Technical Blog",
         items: [
-          "alien.blog.csdn.net 7篇收录在松山湖开发者社区与开放原子",
-          "浏览量 240K+, 粉丝 1K+"
-        ]
-      }
-    }
-  },
-
-  // 页脚
-  footer: {
-    copyright: "© {year} {author}. All rights reserved.",
-    links: {
-      github: "GitHub",
-      email: "联系我",
+          "Published 20+ technical articles on personal blog",
+          "Have 1000+ followers in technical community",
+          "Articles were reposted and referenced by multiple technical platforms",
+        ],
+      },
     },
   },
-}; 
+
+  // Social media links
+  social: {
+    github: "https://github.com/freshpress",
+    twitter: "https://twitter.com/freshpress",
+    discord: "https://discord.gg/freshpress",
+  },
+
+  // Site footer
+  footer: {
+    copyright: "© 2023 FreshPress. All rights reserved.",
+    links: [
+      { text: "Home", url: "/" },
+      { text: "Blog", url: "/blog" },
+      { text: "Projects", url: "/projects" },
+      { text: "About", url: "/about" },
+      { text: "GitHub", url: "https://github.com/freshpress" },
+    ],
+  },
+};

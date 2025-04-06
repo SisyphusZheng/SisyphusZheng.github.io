@@ -7,6 +7,10 @@ export default defineConfig({
   build: {
     target: ["es2021", "chrome100", "safari13"],
     minify: true,
+    outDir: "_site",
+  },
+  router: {
+    trailingSlash: true,
   },
   server: {
     port: 8000,

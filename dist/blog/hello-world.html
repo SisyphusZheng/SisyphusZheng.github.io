@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World | FreshPress</title>
+  <meta name="description" content="基于Fresh框架的现代静态站点生成器">
+  <meta name="author" content="FreshPress Team">
+  <meta name="generator" content="FreshPress">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script>
+    window.LOCALE = "zh-CN";
+  </script>
+</head>
+<body class="min-h-screen bg-gray-50 flex flex-col">
+  <header class="bg-white shadow">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="flex items-center">
+        <span class="text-2xl font-bold mr-2">🍋</span>
+        <a href="/" class="text-xl font-bold text-gray-900">
+          FreshPress
+        </a>
+      </div>
+      <div class="flex space-x-6">
+        <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors">
+          Home
+        </a>
+        <a href="/blog" class="text-gray-700 hover:text-blue-600 transition-colors">
+          Blog
+        </a>
+        <a href="/projects" class="text-gray-700 hover:text-blue-600 transition-colors">
+          Projects
+        </a>
+        <div class="relative group">
+          <button class="text-gray-700 hover:text-blue-600 transition-colors flex items-center">
+            🇨🇳 中文
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+            <a href="/en-US/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              🇺🇸 English
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+  
+  <main class="flex-grow">
+    
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-4">Hello World</h1>
+        <div class="flex items-center text-sm text-gray-500 mb-4">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          2024/3/20
+        </div>
+        <div class="flex flex-wrap gap-2 mb-6">
+          
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Deno
+            </span>
+          
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              Fresh
+            </span>
+          
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              TypeScript
+            </span>
+          
+        </div>
+      </div>
+      
+      <div class="prose prose-blue max-w-none">
+        
+This is my first blog post. In this article, I will introduce how to build a personal website using Deno and the Fresh framework.
+
+## Why Choose Deno and Fresh?
+
+Deno is a modern JavaScript/TypeScript runtime that provides many built-in features such as TypeScript support, ES modules, and security. Fresh is a full-stack web framework based on Deno that offers server-side rendering, zero configuration, and instant hot updates.
+
+## Getting Started
+
+To start using Deno and Fresh, you first need to install Deno:
+
+```bash
+curl -fsSL https://deno.land/x/install/install.sh | sh
+```
+
+Then, you can create a new project using Fresh's scaffolding tool:
+
+```bash
+deno run -A -r https://fresh.deno.dev my-website
+```
+
+## Summary
+
+Deno and Fresh are a powerful combination that can help us quickly build modern web applications. They provide many out-of-the-box features that allow us to focus on business logic rather than configuration.
+      </div>
+      
+      <div class="mt-12 pt-8 border-t border-gray-200">
+        <a href="/blog" class="text-blue-600 hover:text-blue-800 transition-colors font-medium flex items-center">
+          <svg class="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Back to List
+        </a>
+      </div>
+    </div>
+    
+  </main>
+  
+  <footer class="bg-gray-900 text-white mt-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+        <p>
+          <span class="block sm:inline">© 2023 FreshPress. 保留所有权利。</span>
+          <span class="block sm:inline sm:ml-4">Powered By <a href="https://github.com/freshpress/freshpress" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300">FreshPress</a></span>
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

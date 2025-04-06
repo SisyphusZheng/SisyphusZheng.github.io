@@ -4,11 +4,14 @@ export type Locale = "zh-CN" | "en-US";
 
 type TranslationType = {
   [K in Locale]: {
+    siteName: string;
+    description: string;
     nav: {
       home: string;
       blog: string;
       projects: string;
       resume: string;
+      about: string;
     };
     hero: {
       title: string;
@@ -40,14 +43,69 @@ type TranslationType = {
       placeholder: string;
       noResults: string;
       searching: string;
+      blog: string;
+      project: string;
+      type: string;
+      title: string;
+      tags: string;
+      date: string;
+      all: string;
+      recentSearches: string;
+      clearHistory: string;
+      pressToSearch: string;
+    };
+    blog: {
+      title: string;
+      description: string;
+      readMore: string;
+      backToList: string;
+      publishedOn: string;
+      updatedOn: string;
+      tags: string;
+      relatedPosts: string;
+      latestPosts: string;
+      popularPosts: string;
+    };
+    project: {
+      title: string;
+      description: string;
+      viewProject: string;
+      visitSite: string;
+      viewSource: string;
+      technologies: string;
+      features: string;
+      details: string;
+    };
+    common: {
+      loading: string;
+      error: string;
+      success: string;
+      retry: string;
+      cancel: string;
+      confirm: string;
+      save: string;
+      delete: string;
+      edit: string;
+      preview: string;
+    };
+    errors: {
+      notFound: string;
+      pageNotFound: string;
+      returnHome: string;
+      serverError: string;
+    };
+    footer: {
+      copyright: string;
+      poweredBy: string;
+      socialLinks: string;
     };
   };
 };
 
-// 从 localStorage 获取保存的语言设置，如果没有则使用浏览器语言
+// Get saved language setting from localStorage, or use browser language if not available
 const getInitialLocale = (): Locale => {
-  if (typeof window === "undefined") return "zh-CN";
-  
+  if (typeof window === "undefined") return "en-US";
+
   const savedLocale = localStorage.getItem("locale") as Locale;
   if (savedLocale && (savedLocale === "zh-CN" || savedLocale === "en-US")) {
     return savedLocale;
@@ -59,7 +117,7 @@ const getInitialLocale = (): Locale => {
 
 export const currentLocale = signal<Locale>(getInitialLocale());
 
-// 监听语言变化并保存到 localStorage
+// Monitor language changes and save to localStorage
 if (typeof window !== "undefined") {
   effect(() => {
     localStorage.setItem("locale", currentLocale.value);
@@ -69,64 +127,29 @@ if (typeof window !== "undefined") {
 
 export const translations: TranslationType = {
   "zh-CN": {
-    nav: {
-      home: "首页",
-      blog: "博客",
-      projects: "项目",
-      resume: "简历",
-    },
-    hero: {
-      title: "你好，我是郑治",
-      subtitle: "一名热爱技术的前端开发者",
-      blog: "阅读博客",
-      projects: "查看项目",
-    },
-    skills: {
-      title: "技术栈",
-    },
-    news: {
-      title: "最新动态",
-      blog: {
-        title: "最新博客",
-        readMore: "阅读更多",
-      },
-      project: {
-        title: "最新项目",
-        viewProject: "查看项目",
-      },
-    },
-    stats: {
-      blogViews: "博客浏览量",
-      blogFollowers: "博客粉丝",
-      articles: "社区收录文章",
-      projects: "开源项目",
-    },
-    search: {
-      placeholder: "搜索文章和项目...",
-      noResults: "未找到相关结果",
-      searching: "搜索中...",
-    },
-  },
-  "en-US": {
+    siteName: "FreshPress",
+    description: "Modern static site generator based on Fresh framework",
     nav: {
       home: "Home",
       blog: "Blog",
       projects: "Projects",
       resume: "Resume",
+      about: "About",
     },
     hero: {
-      title: "Hi, I'm Zhi Zheng",
-      subtitle: "A passionate frontend developer",
-      blog: "Read Blog",
+      title: "FreshPress",
+      subtitle:
+        "Modern static site generator based on Fresh, build your website quickly",
+      blog: "Browse Blog",
       projects: "View Projects",
     },
     skills: {
-      title: "Skills",
+      title: "Tech Stack",
     },
     news: {
       title: "Latest Updates",
       blog: {
-        title: "Latest Posts",
+        title: "Latest Blog",
         readMore: "Read More",
       },
       project: {
@@ -137,25 +160,212 @@ export const translations: TranslationType = {
     stats: {
       blogViews: "Blog Views",
       blogFollowers: "Blog Followers",
-      articles: "Featured Articles",
+      articles: "Community Articles",
       projects: "Open Source Projects",
     },
     search: {
-      placeholder: "Search posts and projects...",
-      noResults: "No results found",
+      placeholder: "Search articles and projects...",
+      noResults: "No relevant results found",
       searching: "Searching...",
+      blog: "Blog",
+      project: "Project",
+      type: "Type",
+      title: "Title",
+      tags: "Tags",
+      date: "Date",
+      all: "All",
+      recentSearches: "Recent Searches",
+      clearHistory: "Clear History",
+      pressToSearch: "Enter keywords to search",
+    },
+    blog: {
+      title: "Blog Posts",
+      description: "Sharing technical insights and project experiences",
+      readMore: "Read More →",
+      backToList: "Back to List",
+      publishedOn: "Published on",
+      updatedOn: "Updated on",
+      tags: "Tags",
+      relatedPosts: "Related Posts",
+      latestPosts: "Latest Posts",
+      popularPosts: "Popular Posts",
+    },
+    project: {
+      title: "Project Showcase",
+      description:
+        "Some open source and personal projects I've participated in",
+      viewProject: "View Project",
+      visitSite: "Visit Website",
+      viewSource: "View Source",
+      technologies: "Technologies Used",
+      features: "Key Features",
+      details: "Project Details",
+    },
+    common: {
+      loading: "Loading",
+      error: "Error",
+      success: "Success",
+      retry: "Retry",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      save: "Save",
+      delete: "Delete",
+      edit: "Edit",
+      preview: "Preview",
+    },
+    errors: {
+      notFound: "Not Found",
+      pageNotFound: "Page Not Found",
+      returnHome: "Return Home",
+      serverError: "Server Error",
+    },
+    footer: {
+      copyright: "Copyright",
+      poweredBy: "Powered By",
+      socialLinks: "Social Links",
+    },
+  },
+  "en-US": {
+    siteName: "FreshPress",
+    description: "Modern static site generator based on Fresh framework",
+    nav: {
+      home: "Home",
+      blog: "Blog",
+      projects: "Projects",
+      resume: "Resume",
+      about: "About",
+    },
+    hero: {
+      title: "FreshPress",
+      subtitle:
+        "Modern static site generator based on Fresh, build your website quickly",
+      blog: "Browse Blog",
+      projects: "View Projects",
+    },
+    skills: {
+      title: "Tech Stack",
+    },
+    news: {
+      title: "Latest Updates",
+      blog: {
+        title: "Latest Blog",
+        readMore: "Read More",
+      },
+      project: {
+        title: "Latest Projects",
+        viewProject: "View Project",
+      },
+    },
+    stats: {
+      blogViews: "Blog Views",
+      blogFollowers: "Blog Followers",
+      articles: "Community Articles",
+      projects: "Open Source Projects",
+    },
+    search: {
+      placeholder: "Search articles and projects...",
+      noResults: "No relevant results found",
+      searching: "Searching...",
+      blog: "Blog",
+      project: "Project",
+      type: "Type",
+      title: "Title",
+      tags: "Tags",
+      date: "Date",
+      all: "All",
+      recentSearches: "Recent Searches",
+      clearHistory: "Clear History",
+      pressToSearch: "Enter keywords to search",
+    },
+    blog: {
+      title: "Blog Posts",
+      description: "Sharing technical insights and project experiences",
+      readMore: "Read More →",
+      backToList: "Back to List",
+      publishedOn: "Published on",
+      updatedOn: "Updated on",
+      tags: "Tags",
+      relatedPosts: "Related Posts",
+      latestPosts: "Latest Posts",
+      popularPosts: "Popular Posts",
+    },
+    project: {
+      title: "Project Showcase",
+      description:
+        "Some open source and personal projects I've participated in",
+      viewProject: "View Project",
+      visitSite: "Visit Website",
+      viewSource: "View Source",
+      technologies: "Technologies Used",
+      features: "Key Features",
+      details: "Project Details",
+    },
+    common: {
+      loading: "Loading",
+      error: "Error",
+      success: "Success",
+      retry: "Retry",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      save: "Save",
+      delete: "Delete",
+      edit: "Edit",
+      preview: "Preview",
+    },
+    errors: {
+      notFound: "Not Found",
+      pageNotFound: "Page Not Found",
+      returnHome: "Return Home",
+      serverError: "Server Error",
+    },
+    footer: {
+      copyright: "Copyright",
+      poweredBy: "Powered By",
+      socialLinks: "Social Links",
     },
   },
 };
 
+// Use nested keys to access translations
 export function t(key: string, locale: Locale = currentLocale.value): string {
   const keys = key.split(".");
-  let value: any = translations[locale];
-  
+  let result: any = translations[locale];
+
   for (const k of keys) {
-    if (value === undefined) return key;
-    value = value[k];
+    if (result && typeof result === "object" && k in result) {
+      result = result[k];
+    } else {
+      console.warn(`Translation key not found: ${key}`);
+      return key;
+    }
   }
-  
-  return value || key;
-} 
+
+  return result;
+}
+
+// Toggle between available locales
+export function toggleLocale(): void {
+  currentLocale.value = currentLocale.value === "zh-CN" ? "en-US" : "zh-CN";
+}
+
+// Format date according to current locale
+export function formatDate(
+  date: Date | string,
+  locale: Locale = currentLocale.value
+): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+
+  if (locale === "zh-CN") {
+    return d.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}

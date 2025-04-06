@@ -1,16 +1,12 @@
 import { Handlers } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
 import { siteConfig } from "../../data/config.ts";
+import { getAllPosts, Post } from "../../utils/blog.ts";
 
-interface Post {
-  slug: string;
-  title: string;
-  date: string;
-  tags: string[];
-  content: string;
-}
-
-function parseFrontMatter(content: string): { attrs: Record<string, any>; body: string } {
+function parseFrontMatter(content: string): {
+  attrs: Record<string, any>;
+  body: string;
+} {
   const lines = content.split("\n");
   const attrs: Record<string, any> = {};
   let body = content;
@@ -42,20 +38,7 @@ function parseFrontMatter(content: string): { attrs: Record<string, any>; body: 
 
 export const handler: Handlers<Post[]> = {
   async GET(_req, ctx) {
-    const posts = [];
-    for await (const dirEntry of Deno.readDir("./blog")) {
-      if (dirEntry.isFile && dirEntry.name.endsWith(".md")) {
-        const file = await Deno.readTextFile(`./blog/${dirEntry.name}`);
-        const { attrs, body } = parseFrontMatter(file);
-        posts.push({
-          slug: dirEntry.name.replace(".md", ""),
-          title: attrs.title || "未命名文章",
-          date: attrs.date || new Date().toISOString(),
-          tags: attrs.tags ? attrs.tags.split(",").map((tag: string) => tag.trim()) : [],
-          content: body,
-        });
-      }
-    }
+    const posts = await getAllPosts();
     return ctx.render(posts);
   },
 };
@@ -86,9 +69,7 @@ export default function BlogIndex({ data }: { data: Post[] }) {
                   </span>
                 ))}
               </div>
-              <p class="text-gray-600">
-                {post.content.split("\n")[0]}
-              </p>
+              <p class="text-gray-600">{post.content.split("\n")[0]}</p>
               <a
                 href={`/blog/${post.slug}`}
                 class="inline-block mt-4 text-blue-600 hover:text-blue-800 transition-colors"
@@ -101,4 +82,4 @@ export default function BlogIndex({ data }: { data: Post[] }) {
       </div>
     </Layout>
   );
-} 
+}

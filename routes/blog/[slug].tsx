@@ -2,54 +2,18 @@ import { Handlers } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
 import { siteConfig } from "../../data/config.ts";
 import { marked } from "marked";
-
-interface Post {
-  slug: string;
-  title: string;
-  date: string;
-  tags: string[];
-  content: string;
-}
-
-function parseFrontMatter(content: string): { attrs: Record<string, any>; body: string } {
-  const lines = content.split("\n");
-  if (lines[0] !== "---") {
-    return { attrs: {}, body: content };
-  }
-
-  const attrs: Record<string, any> = {};
-  let i = 1;
-  for (; i < lines.length; i++) {
-    if (lines[i] === "---") {
-      i++;
-      break;
-    }
-    const [key, ...values] = lines[i].split(":");
-    attrs[key.trim()] = values.join(":").trim().replace(/^['"]|['"]$/g, "");
-  }
-
-  return {
-    attrs,
-    body: lines.slice(i).join("\n"),
-  };
-}
+import { getPostBySlug, Post } from "../../utils/blog.ts";
 
 export const handler: Handlers<Post> = {
   async GET(_req, ctx) {
     const slug = ctx.params.slug;
-    try {
-      const file = await Deno.readTextFile(`./blog/${slug}.md`);
-      const { attrs, body } = parseFrontMatter(file);
-      return ctx.render({
-        slug,
-        title: attrs.title as string,
-        date: attrs.date as string,
-        tags: (attrs.tags as string).split(",").map((tag) => tag.trim()),
-        content: body,
-      });
-    } catch {
+    const post = await getPostBySlug(slug);
+
+    if (!post) {
       return ctx.renderNotFound();
     }
+
+    return ctx.render(post);
   },
 };
 
@@ -73,4 +37,4 @@ export default function BlogPost({ data }: { data: Post }) {
       </article>
     </Layout>
   );
-} 
+}
