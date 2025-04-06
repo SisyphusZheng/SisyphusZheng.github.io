@@ -11,7 +11,8 @@ export default function BlogList() {
   const allTags = Array.from(new Set(posts.flatMap((post) => post.tags)));
 
   const filteredPosts = posts.filter((post) => {
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.content.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTag = selectedTag ? post.tags.includes(selectedTag) : true;
     return matchesSearch && matchesTag;
@@ -19,7 +20,10 @@ export default function BlogList() {
 
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
-  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+  const paginatedPosts = filteredPosts.slice(
+    startIndex,
+    startIndex + postsPerPage
+  );
 
   return (
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -81,7 +85,7 @@ export default function BlogList() {
                 </div>
               </div>
               <div class="prose max-w-none">
-                <Markdown content={post.content.split("\n")[0]} />
+                <Markdown content={post.excerpt} />
               </div>
               <a
                 href={`/blog/${post.slug}`}
@@ -112,4 +116,4 @@ export default function BlogList() {
       )}
     </div>
   );
-} 
+}

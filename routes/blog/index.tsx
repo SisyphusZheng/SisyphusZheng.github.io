@@ -42,10 +42,11 @@ export const handler: Handlers<Post[]> = {
     // 从URL获取语言参数
     const url = new URL(req.url);
     const langParam = url.searchParams.get("lang");
+
     const locale =
       langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
 
-    const posts = await getAllPosts();
+    const posts = await getAllPosts(locale);
     return ctx.render(posts);
   },
 };
@@ -81,7 +82,7 @@ export default function BlogIndex({ data }: { data: Post[] }) {
                   </span>
                 ))}
               </div>
-              <p class="text-gray-600">{post.content.split("\n")[0]}</p>
+              <p class="text-gray-600">{post.excerpt}</p>
               <a
                 href={`/blog/${post.slug}`}
                 class="inline-block mt-4 text-blue-600 hover:text-blue-800 transition-colors"
