@@ -158,11 +158,6 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Search component */}
-        <div class={`${showSearch ? "block" : "hidden"} py-4`}>
-          <Search />
-        </div>
-
         {/* Search modal */}
         {showSearch && (
           <div class="fixed inset-0 z-50 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-start justify-center pt-20">
