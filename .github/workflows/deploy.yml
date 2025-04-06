@@ -24,12 +24,12 @@ jobs:
           deno-version: v2.x
 
       - name: Build step
-        run: "deno task start"
+        run: "deno task build"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "zhi"
+          project: "z-sisyphuszhe-79"
           entrypoint: "main.ts"
           root: "."
           
