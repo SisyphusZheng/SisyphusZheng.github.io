@@ -3,7 +3,6 @@
     "start": "deno run -A --unstable-sloppy-imports --watch=static/,routes/ dev.ts",
     "preview": "deno run -A main.ts",
     "build": "deno run -A scripts/simple-build.ts",
-    "build:static": "deno run -A scripts/build.ts",
     "dev:full": "deno run -A --unstable-sloppy-imports --watch=static/,routes/,islands/,components/,utils/,data/ dev.ts"
   },
   "imports": {
