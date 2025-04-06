@@ -1,7 +1,7 @@
 ---
 title: "Hello World"
 date: "2024-03-20"
-tags: "Deno, Fresh, TypeScript"
+tags: ["Deno", "Fresh", "TypeScript", "Hello"]
 ---
 
 This is my first blog post. In this article, I will introduce how to build a personal website using Deno and the Fresh framework.

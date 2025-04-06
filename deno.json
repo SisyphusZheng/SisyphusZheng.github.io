@@ -1,8 +1,9 @@
 {
   "tasks": {
-    "start": "deno run -A --unstable-sloppy-imports --watch=static/,routes/ dev.ts",
+    "start": "deno run -A scripts/generate-search-index-dev.ts && deno run -A --unstable-sloppy-imports --watch=static/,routes/ dev.ts",
     "preview": "deno run -A main.ts",
-    "build": "GITHUB_CLIENT_ID=fake GITHUB_CLIENT_SECRET=fake FACEBOOK_CLIENT_ID=fake FACEBOOK_CLIENT_SECRET=fake GOOGLE_CLIENT_ID=fake GOOGLE_CLIENT_SECRET=fake deno run -A --unstable-kv dev.ts build"
+    "build": "GITHUB_CLIENT_ID=fake GITHUB_CLIENT_SECRET=fake FACEBOOK_CLIENT_ID=fake FACEBOOK_CLIENT_SECRET=fake GOOGLE_CLIENT_ID=fake GOOGLE_CLIENT_SECRET=fake deno run -A scripts/generate-search-index.ts && deno run -A --unstable-kv dev.ts build",
+    "gen-search-index": "deno run -A scripts/generate-search-index.ts"
   },
   "imports": {
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",

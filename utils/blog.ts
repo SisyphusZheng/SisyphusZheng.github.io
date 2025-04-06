@@ -59,7 +59,11 @@ export async function getAllPosts(): Promise<Post[]> {
             let tags: string[] = [];
             if (attrs.tags) {
               if (typeof attrs.tags === "string") {
-                tags = attrs.tags.split(",").map((tag: string) => tag.trim());
+                // 去除可能的引号
+                const tagsStr = attrs.tags.replace(/^['"]|['"]$/g, "");
+                tags = tagsStr.split(",").map((tag: string) => tag.trim());
+                // 输出解析后的标签，用于调试
+                console.log(`Parsed tags from string "${attrs.tags}":`, tags);
               } else if (Array.isArray(attrs.tags)) {
                 tags = attrs.tags;
               }

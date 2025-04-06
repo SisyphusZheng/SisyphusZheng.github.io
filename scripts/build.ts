@@ -45,6 +45,26 @@ async function main() {
     console.log("📂 复制静态资源...");
     await copy(STATIC_DIR, join(OUTPUT_DIR, "static"), { overwrite: true });
 
+    // 生成搜索索引
+    console.log("🔍 生成搜索索引...");
+    const searchIndexProcess = Deno.run({
+      cmd: ["deno", "run", "-A", "scripts/generate-search-index.ts"],
+      stdout: "piped",
+      stderr: "piped",
+    });
+
+    const searchIndexStatus = await searchIndexProcess.status();
+    if (!searchIndexStatus.success) {
+      console.error("❌ 生成搜索索引失败");
+      const stderr = new TextDecoder().decode(
+        await searchIndexProcess.stderrOutput()
+      );
+      console.error(stderr);
+    } else {
+      console.log("✅ 搜索索引生成成功");
+    }
+    searchIndexProcess.close();
+
     // 获取所有路由
     console.log("🗺️ 分析路由...");
     const routeFiles = [];

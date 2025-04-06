@@ -1,7 +1,53 @@
 import { siteConfig } from "../data/config.ts";
 import { currentLocale, Locale } from "./i18n.ts";
-import { getAllPosts } from "./blog.ts";
-import { getAllProjects } from "./projects.ts";
+// 移除服务器端导入
+// import { getAllPosts } from "./blog.ts";
+// import { getAllProjects } from "./projects.ts";
+
+// 硬编码的示例博客数据，用于客户端搜索
+const SAMPLE_BLOG_POSTS = [
+  {
+    title: "Hello World",
+    slug: "hello-world",
+    date: "2024-03-20",
+    tags: ["Deno", "Fresh", "TypeScript", "Hello"],
+    content:
+      "This is my first blog post. In this article, I will introduce how to build a personal website using Deno and the Fresh framework.",
+    locale: "en-US" as Locale,
+  },
+  {
+    title: "FreshPress 简介",
+    slug: "freshpress-introduction",
+    date: "2024-03-15",
+    tags: ["Deno", "Fresh", "TypeScript", "FreshPress"],
+    content:
+      "FreshPress是一个基于Fresh框架的现代静态站点生成器，旨在帮助开发者快速构建个人网站或博客。",
+    locale: "zh-CN" as Locale,
+  },
+  {
+    title: "FreshPress Features",
+    slug: "freshpress-features-en",
+    date: "2024-03-10",
+    tags: ["Features", "Fresh", "StaticSite"],
+    content:
+      "Explore the powerful features of FreshPress, a modern static site generator based on the Fresh framework.",
+    locale: "en-US" as Locale,
+  },
+];
+
+// 硬编码的示例项目数据
+const SAMPLE_PROJECTS = [
+  {
+    title: "Personal Website",
+    description: "Modern personal website built with Fresh framework",
+    technologies: ["Deno", "Fresh", "TypeScript", "TailwindCSS"],
+  },
+  {
+    title: "Online Code Editor",
+    description: "Online code editor based on Monaco Editor",
+    technologies: ["React", "TypeScript", "Monaco Editor"],
+  },
+];
 
 export interface SearchResult {
   type: "blog" | "project";
@@ -15,56 +61,79 @@ export interface SearchResult {
   relevance?: number; // Search relevance score
 }
 
-// Adjust search weights, increase the weight of title
+// 搜索权重
 const WEIGHTS = {
-  title: 5, // Increase title weight to prioritize title matches
-  tags: 2,
-  content: 1,
-  description: 1.5,
+  title: 5, // 标题权重
+  tags: 2, // 标签权重
+  content: 0, // 内容搜索已禁用
+  description: 0, // 描述搜索已禁用
 };
 
+// 索引缓存
+let searchIndexCache: any[] | null = null;
+
+// 加载搜索索引
+async function loadSearchIndex(): Promise<any[]> {
+  if (searchIndexCache) {
+    return searchIndexCache;
+  }
+
+  try {
+    console.log("📂 加载搜索索引文件...");
+    const response = await fetch("/search-index.json");
+    if (!response.ok) {
+      throw new Error(`加载搜索索引失败: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`✅ 加载完成, 包含 ${data.length} 个索引项`);
+    searchIndexCache = data;
+    return data;
+  } catch (error) {
+    console.error("❌ 加载搜索索引出错:", error);
+    return [];
+  }
+}
+
 /**
- * Search blog and project content
- * @param query Search keyword
- * @param locale Optional language filter
- * @returns Array of search results
+ * 搜索内容
+ * @param query 搜索关键词
+ * @param locale 可选的语言过滤
+ * @returns 搜索结果数组
  */
 export async function searchContent(
   query: string,
   locale?: Locale
 ): Promise<SearchResult[]> {
   const results: SearchResult[] = [];
-  console.log(`Starting search: "${query}", Language: ${locale || "All"}`);
+  console.log(`开始搜索: "${query}", 语言: ${locale || "全部"}`);
 
   if (!query || query.trim().length < 2) {
-    console.log("Search term too short, at least 2 characters required");
+    console.log("搜索词太短，至少需要2个字符");
     return results;
   }
 
   const normalizedQuery = query.toLowerCase().trim();
   const currentLang = locale || currentLocale.value;
-  console.log(
-    `Processed search term: "${normalizedQuery}", Current language: ${currentLang}`
-  );
+  console.log(`处理搜索词: "${normalizedQuery}", 当前语言: ${currentLang}`);
 
-  // Search blog posts
   try {
-    const posts = await getAllPosts();
-    console.log(`Found ${posts.length} blog posts to search`);
+    // 加载索引
+    const searchIndex = await loadSearchIndex();
 
-    for (const post of posts) {
-      // Debug output basic info for each article
+    // 遍历索引项搜索
+    for (const item of searchIndex) {
+      // 调试输出
       console.log(
-        `Checking blog: "${post.title}", Language: ${
-          post.locale || "Unspecified"
-        }, Tags: ${post.tags?.join(", ") || "None"}`
+        `检查项: ${item.title}, 类型: ${item.type}, 标签: ${(
+          item.tags || []
+        ).join(", ")}`
       );
 
-      // Skip if language specified and post language doesn't match (unless post has no language specified)
-      if (currentLang && post.locale && post.locale !== currentLang) {
-        // Only skip when the post has a specific language setting that doesn't match the current language
+      // 语言过滤
+      if (locale && item.locale && item.locale !== locale) {
         console.log(
-          `Skipping post with non-matching language: ${post.title}, Post language=${post.locale}, Current language=${currentLang}`
+          `跳过不匹配语言的项: ${item.title}, 项语言=${item.locale}, 搜索语言=${locale}`
         );
         continue;
       }
@@ -72,258 +141,81 @@ export async function searchContent(
       let relevance = 0;
       let matchDetails = [];
 
-      // Calculate title match (case insensitive)
-      if (post.title && post.title.toLowerCase().includes(normalizedQuery)) {
+      // 标题匹配
+      if (item.title && item.title.toLowerCase().includes(normalizedQuery)) {
         relevance += WEIGHTS.title;
         matchDetails.push("title");
-        console.log(
-          `Post "${post.title}" title matches search term "${normalizedQuery}"`
-        );
+        console.log(`项 "${item.title}" 标题匹配搜索词 "${normalizedQuery}"`);
       }
 
-      // Calculate tag match
-      if (post.tags && post.tags.length > 0) {
-        const normalizedTags = post.tags.map((tag) =>
+      // 标签匹配
+      if (item.tags && Array.isArray(item.tags)) {
+        const normalizedTags = item.tags.map((tag: string) =>
           typeof tag === "string" ? tag.toLowerCase() : ""
         );
         const hasTagMatch = normalizedTags.some(
-          (tag) => tag && tag.includes(normalizedQuery)
+          (tag: string) => tag && tag.includes(normalizedQuery)
         );
         if (hasTagMatch) {
           relevance += WEIGHTS.tags;
           matchDetails.push("tags");
-          console.log(
-            `Post "${post.title}" tags match search term "${normalizedQuery}"`
-          );
+          console.log(`项 "${item.title}" 标签匹配搜索词 "${normalizedQuery}"`);
         }
       }
 
-      // Calculate content match
-      if (
-        post.content &&
-        post.content.toLowerCase().includes(normalizedQuery)
-      ) {
-        relevance += WEIGHTS.content;
-        matchDetails.push("content");
-        console.log(
-          `Post "${post.title}" content matches search term "${normalizedQuery}"`
-        );
-      }
-
+      // 添加结果
       if (relevance > 0) {
         console.log(
-          `Blog "${
-            post.title
-          }" matches, Relevance: ${relevance}, Matches: ${matchDetails.join(
-            ", "
-          )}`
+          `项 "${
+            item.title
+          }" 匹配成功, 相关度: ${relevance}, 匹配项: ${matchDetails.join(", ")}`
         );
 
-        // Extract match context as excerpt
+        // 提取匹配上下文作为摘要
         let excerpt = "";
-        if (post.content) {
-          const contentLower = post.content.toLowerCase();
+        if (item.content) {
+          const contentLower = item.content.toLowerCase();
           const index = contentLower.indexOf(normalizedQuery);
           if (index !== -1) {
             const start = Math.max(0, index - 40);
             const end = Math.min(
-              post.content.length,
+              item.content.length,
               index + normalizedQuery.length + 40
             );
             excerpt =
               (start > 0 ? "..." : "") +
-              post.content.substring(start, end).trim() +
-              (end < post.content.length ? "..." : "");
+              item.content.substring(start, end).trim() +
+              (end < item.content.length ? "..." : "");
           } else {
-            excerpt = post.content.split("\n")[0];
+            excerpt = item.content.split("\n")[0];
           }
         }
 
         results.push({
-          type: "blog",
-          title: post.title,
-          description:
-            post.description ||
-            (post.content ? post.content.split("\n")[0] : ""),
+          type: item.type,
+          title: item.title,
+          description: item.description || "",
           excerpt,
-          url: `/blog/${post.slug}`,
-          tags: post.tags || [],
-          date: post.date,
-          locale: post.locale,
+          url: item.url,
+          tags: item.tags || [],
+          date: item.date,
+          locale: item.locale,
           relevance,
         });
       } else {
-        console.log(
-          `Post "${post.title}" does not match search term "${normalizedQuery}"`
-        );
+        console.log(`项 "${item.title}" 不匹配搜索词 "${normalizedQuery}"`);
       }
     }
+
+    // 按相关性排序
+    results.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
+
+    console.log(`搜索完成. 找到 ${results.length} 个结果.`);
+
+    // 返回前10个结果
+    return results.slice(0, 10);
   } catch (error) {
-    console.error("Error searching blogs:", error);
-  }
-
-  // Search projects
-  try {
-    const projects = getAllProjects();
-    console.log(`Found ${projects.length} projects to search`);
-
-    for (const project of projects) {
-      // Skip if project structure is undefined
-      if (!project || typeof project !== "object") {
-        console.log("Skipping invalid project structure");
-        continue;
-      }
-
-      // Debug output project basic info
-      console.log(
-        `Checking project: "${project.title}", Technologies: ${
-          project.technologies?.join(", ") || "None"
-        }`
-      );
-
-      let relevance = 0;
-      let matchDetails = [];
-
-      // Calculate title match
-      if (
-        project.title &&
-        project.title.toLowerCase().includes(normalizedQuery)
-      ) {
-        relevance += WEIGHTS.title;
-        matchDetails.push("title");
-        console.log(
-          `Project "${project.title}" title matches search term "${normalizedQuery}"`
-        );
-      }
-
-      // Calculate description match
-      if (
-        project.description &&
-        project.description.toLowerCase().includes(normalizedQuery)
-      ) {
-        relevance += WEIGHTS.description;
-        matchDetails.push("description");
-        console.log(
-          `Project "${project.title}" description matches search term "${normalizedQuery}"`
-        );
-      }
-
-      // Calculate tech tags match
-      if (project.technologies && project.technologies.length > 0) {
-        const normalizedTags = project.technologies.map((tech) =>
-          tech.toLowerCase()
-        );
-        const hasTagMatch = normalizedTags.some((tech) =>
-          tech.includes(normalizedQuery)
-        );
-        if (hasTagMatch) {
-          relevance += WEIGHTS.tags;
-          matchDetails.push("technologies");
-          console.log(
-            `Project "${project.title}" technologies match search term "${normalizedQuery}"`
-          );
-        }
-      }
-
-      // Add to results if relevant
-      if (relevance > 0) {
-        console.log(
-          `Project "${
-            project.title
-          }" matches, Relevance: ${relevance}, Matches: ${matchDetails.join(
-            ", "
-          )}`
-        );
-
-        // Generate URL from title for projects
-        const projectUrl = `/projects/${project.title
-          .toLowerCase()
-          .replace(/\s+/g, "-")}`;
-
-        results.push({
-          type: "project",
-          title: project.title,
-          description: project.description || "",
-          url: projectUrl,
-          tags: project.technologies || [],
-          relevance,
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Error searching projects:", error);
-  }
-
-  // Sort results by relevance (highest first)
-  results.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
-
-  console.log(`Search complete. Found ${results.length} results.`);
-
-  // Return top 10 results
-  return results.slice(0, 10);
-}
-
-/**
- * Save recent searches to localStorage
- * @param query Search term to save
- */
-export function saveRecentSearch(query: string): void {
-  if (typeof window === "undefined" || !query || query.trim().length < 2) {
-    return;
-  }
-
-  try {
-    const trimmedQuery = query.trim();
-    const savedSearches = getRecentSearches();
-
-    // Check if the search already exists
-    const exists = savedSearches.includes(trimmedQuery);
-
-    // If it exists, remove it to add to the beginning
-    const updatedSearches = exists
-      ? [trimmedQuery, ...savedSearches.filter((s) => s !== trimmedQuery)]
-      : [trimmedQuery, ...savedSearches];
-
-    // Limit to 10 recent searches
-    const limitedSearches = updatedSearches.slice(0, 10);
-
-    localStorage.setItem("recentSearches", JSON.stringify(limitedSearches));
-  } catch (error) {
-    console.error("Error saving recent search:", error);
-  }
-}
-
-/**
- * Get recent searches from localStorage
- * @returns Array of recent search terms
- */
-export function getRecentSearches(): string[] {
-  if (typeof window === "undefined") {
+    console.error("搜索出错:", error);
     return [];
-  }
-
-  try {
-    const savedSearches = localStorage.getItem("recentSearches");
-    if (!savedSearches) return [];
-
-    return JSON.parse(savedSearches);
-  } catch (error) {
-    console.error("Error retrieving recent searches:", error);
-    return [];
-  }
-}
-
-/**
- * Clear all recent searches from localStorage
- */
-export function clearRecentSearches(): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  try {
-    localStorage.removeItem("recentSearches");
-  } catch (error) {
-    console.error("Error clearing recent searches:", error);
   }
 }

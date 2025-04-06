@@ -82,7 +82,7 @@ export default function Search() {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="搜索文章和项目..."
+            placeholder="搜索文章和项目的标题与标签..."
             value={query}
             onInput={(e: Event) =>
               handleSearch((e.target as HTMLInputElement).value)
@@ -126,6 +126,10 @@ export default function Search() {
               </svg>
             </button>
           )}
+        </div>
+
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          支持搜索博客文章和项目的标题和标签
         </div>
 
         {isLoading && (

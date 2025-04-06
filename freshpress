@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# FreshPress CLI 工具
+# 提供构建和启动等常用操作
+
+# 显示帮助信息
+show_help() {
+  echo "FreshPress CLI - 项目管理工具"
+  echo ""
+  echo "用法:"
+  echo "  freshpress [命令] [选项]"
+  echo ""
+  echo "命令:"
+  echo "  start       启动开发服务器"
+  echo "  build       构建静态网站"
+  echo "  index       生成搜索索引"
+  echo "  help        显示帮助信息"
+  echo ""
+  echo "示例:"
+  echo "  freshpress start    # 启动开发服务器"
+  echo "  freshpress build    # 构建静态网站"
+  echo "  freshpress index    # 生成搜索索引"
+}
+
+# 获取命令行参数
+command=$1
+
+# 根据命令执行相应操作
+case "$command" in
+  "start")
+    echo "🚀 启动开发服务器..."
+    deno task start
+    ;;
+    
+  "build")
+    echo "🏗️ 开始构建静态网站..."
+    deno task build
+    ;;
+    
+  "index")
+    echo "🔍 生成搜索索引..."
+    deno task gen-index
+    ;;
+    
+  "help")
+    show_help
+    ;;
+    
+  *)
+    if [ -z "$command" ]; then
+      show_help
+    else
+      echo "❌ 未知命令: \"$command\""
+      show_help
+      exit 1
+    fi
+    ;;
+esac 
