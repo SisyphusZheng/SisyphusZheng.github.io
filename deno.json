@@ -2,8 +2,7 @@
   "tasks": {
     "start": "deno run -A --unstable-sloppy-imports --watch=static/,routes/ dev.ts",
     "preview": "deno run -A main.ts",
-    "build": "deno run -A scripts/simple-build.ts",
-    "dev:full": "deno run -A --unstable-sloppy-imports --watch=static/,routes/,islands/,components/,utils/,data/ dev.ts"
+    "build": "GITHUB_CLIENT_ID=fake GITHUB_CLIENT_SECRET=fake FACEBOOK_CLIENT_ID=fake FACEBOOK_CLIENT_SECRET=fake GOOGLE_CLIENT_ID=fake GOOGLE_CLIENT_SECRET=fake deno run -A --unstable-kv dev.ts build"
   },
   "imports": {
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
