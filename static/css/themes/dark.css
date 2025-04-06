@@ -5,10 +5,10 @@
   --primary-light: #1e3a8a;
   --primary-dark: #93c5fd;
 
-  /* Text Colors */
-  --text-primary: #f3f4f6;
-  --text-secondary: #d1d5db;
-  --text-muted: #9ca3af;
+  /* Text Colors - 提高对比度 */
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
   --text-light: #f9fafb;
 
   /* Background Colors */
@@ -29,7 +29,7 @@
 
   /* Code Block */
   --code-bg: #111827;
-  --code-text: #e5e7eb;
+  --code-text: #f1f5f9;
   --code-border: #374151;
 
   /* Card */
@@ -40,14 +40,14 @@
 
   /* Navigation */
   --nav-bg: #111827;
-  --nav-text: #d1d5db;
+  --nav-text: #e2e8f0;
   --nav-text-hover: #f9fafb;
   --nav-border: #374151;
 
   /* Footer */
   --footer-bg: #111827;
-  --footer-text: #d1d5db;
-  --footer-link: #9ca3af;
+  --footer-text: #e2e8f0;
+  --footer-link: #cbd5e1;
   --footer-link-hover: #f9fafb;
 }
 
@@ -141,18 +141,18 @@ button.text-gray-500:hover {
   border-color: var(--border-color) !important;
 }
 
-/* Fixed dark mode - applied directly to .dark class */
+/* Dark mode global styles */
 .dark {
   /* Primary Colors - Night indigo palette */
-  --primary-color: #818cf8; /* Bright indigo */
-  --primary-hover: #6366f1; /* Medium bright indigo */
-  --primary-light: #4f46e5; /* Indigo */
+  --primary-color: #93c5fd; /* 调亮了颜色 */
+  --primary-hover: #60a5fa; /* 调亮了hover颜色 */
+  --primary-light: #3b82f6; /* 调整为更明亮的蓝色 */
   --primary-dark: #c7d2fe; /* Very light indigo */
 
   /* Text Colors - Enhanced night reading experience */
-  --text-primary: #f1f5f9; /* Light gray-white */
-  --text-secondary: #cbd5e1; /* Medium gray-white */
-  --text-muted: #94a3b8; /* Gray-blue */
+  --text-primary: #ffffff; /* 纯白色文本，提高对比度 */
+  --text-secondary: #e2e8f0; /* 提高对比度 */
+  --text-muted: #cbd5e1; /* 提高对比度 */
   --text-light: #0f172a; /* Deep blue-black - for dark text on light backgrounds */
 
   /* Background Colors - Elegant dark tones */
@@ -162,37 +162,8 @@ button.text-gray-500:hover {
   --bg-dark: #f8fafc; /* Very light gray-blue - for light elements on dark backgrounds */
 
   /* Border Colors */
-  --border-color: #334155; /* Medium blue-gray */
-  --border-light: #475569; /* Light blue-gray */
-
-  /* Status Colors - Night adapted status colors */
-  --success: #34d399; /* Bright green */
-  --warning: #fbbf24; /* Bright yellow */
-  --error: #f87171; /* Bright red */
-  --info: #60a5fa; /* Bright blue */
-
-  /* Code Block - Enhanced night code readability */
-  --code-bg: #1e293b; /* Deep blue-gray background */
-  --code-text: #e2e8f0; /* Light gray text */
-  --code-border: #334155; /* Medium blue-gray border */
-
-  /* Card - Elegant night cards */
-  --card-bg: #1e293b; /* Deep blue-gray background */
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2),
-    0 2px 4px -1px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  --card-border: #334155; /* Medium blue-gray border */
-
-  /* Navigation - Night navigation bar */
-  --nav-bg: rgba(15, 23, 42, 0.95); /* Semi-transparent deep blue-black */
-  --nav-text: #cbd5e1; /* Medium gray-white */
-  --nav-text-hover: #818cf8; /* Hover shows primary color */
-  --nav-border: #334155; /* Medium blue-gray border */
-
-  /* Footer - Night footer */
-  --footer-bg: #0f172a; /* Deep blue-black */
-  --footer-text: #f1f5f9; /* Light gray-white */
-  --footer-link: #94a3b8; /* Gray-blue */
-  --footer-link-hover: #818cf8; /* Hover shows primary color */
+  --border-color: #475569; /* 调亮边框颜色 */
+  --border-light: #64748b; /* 调亮边框颜色 */
 
   /* Global background and text */
   background-color: var(--bg-secondary);
@@ -805,4 +776,93 @@ button.text-gray-500:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3) !important;
   border-color: #4f46e5 !important;
+}
+
+/* 增强内容文本的对比度 */
+.dark .text-gray-300 {
+  color: #f1f5f9 !important; /* 提高亮度 */
+}
+
+.dark .text-gray-400 {
+  color: #e2e8f0 !important; /* 提高亮度 */
+}
+
+.dark .text-gray-500 {
+  color: #cbd5e1 !important; /* 提高亮度 */
+}
+
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: #e2e8f0 !important; /* 显著提高亮度 */
+}
+
+/* 增强Markdown内容可读性 */
+.dark .prose p,
+.dark .prose li,
+.dark .prose blockquote {
+  color: #f1f5f9 !important; /* 提高内容文本亮度 */
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+  color: #ffffff !important; /* 标题使用纯白色 */
+}
+
+.dark .prose a {
+  color: #93c5fd !important; /* 亮蓝色链接 */
+}
+
+.dark .prose a:hover {
+  color: #bfdbfe !important; /* hover时更亮 */
+  text-decoration: underline;
+}
+
+.dark .prose code {
+  color: #f1f5f9 !important;
+  background-color: #1e293b !important;
+}
+
+.dark .markdown-content {
+  color: #f1f5f9 !important; /* 提高markdown内容可读性 */
+}
+
+/* 增强博客文章内容可读性 */
+.dark .blog-content p,
+.dark .blog-content li {
+  color: #f1f5f9 !important;
+}
+
+/* 增强命令行代码的可见度 */
+code {
+  color: #34d399 !important; /* 明亮的绿色 */
+  font-weight: bold;
+}
+
+.command,
+pre .command {
+  color: #10b981 !important; /* 中等亮度的绿色 */
+  font-weight: bold;
+}
+
+div[class*="language-"],
+pre,
+.code-block {
+  background-color: #111827 !important; /* 深色背景 */
+  border: 1px solid #374151 !important; /* 边框颜色 */
+}
+
+/* 添加明显的命令提示符 */
+.command::before {
+  content: "$ ";
+  color: #9ca3af !important; /* 灰色命令提示符 */
+  font-weight: normal;
+}
+
+/* 优化代码显示 */
+.dark {
+  --code-bg: #111827; /* 更深的背景色 */
+  --code-text: #34d399; /* 更亮的绿色 */
+  --code-border: #374151; /* 深色边框 */
 }

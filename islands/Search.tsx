@@ -71,7 +71,7 @@ export default function Search() {
     const regex = new RegExp(`(${query})`, "gi");
     return text.replace(
       regex,
-      `<mark class="bg-yellow-200 dark:bg-yellow-700">$1</mark>`
+      `<mark class="bg-yellow-200 dark:bg-yellow-700 dark:text-white font-medium px-1 rounded">$1</mark>`
     );
   };
 
@@ -199,7 +199,7 @@ export default function Search() {
         {/* 无结果提示 */}
         {!isLoading && query.length >= 2 && results.length === 0 && (
           <div class="mt-6 text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p class="text-gray-500 dark:text-gray-400">
+            <p class="text-gray-500 dark:text-gray-300">
               未找到与 "{query}" 相关的结果
             </p>
           </div>

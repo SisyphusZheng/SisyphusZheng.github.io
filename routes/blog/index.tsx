@@ -58,36 +58,38 @@ export default function BlogIndex({ data }: { data: Post[] }) {
   return (
     <Layout>
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 class="text-4xl font-bold mb-8">{t("blog.title", locale)}</h1>
-        <p class="text-xl text-gray-600 mb-8">
+        <h1 class="text-4xl font-bold mb-8 dark:text-white">
+          {t("blog.title", locale)}
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
           {t("blog.description", locale)}
         </p>
 
         <div class="space-y-8">
           {data.map((post) => (
-            <article class="bg-white p-6 rounded-lg shadow-md">
+            <article class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               <h2 class="text-2xl font-bold mb-2">
                 <a
                   href={`/blog/${post.slug}`}
-                  class="text-gray-900 hover:text-blue-600 transition-colors"
+                  class="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   {post.title}
                 </a>
               </h2>
-              <div class="text-gray-500 mb-4">
+              <div class="text-gray-500 dark:text-gray-400 mb-4">
                 {formatDate(post.date, locale)} ·{" "}
                 {post.tags.map((tag) => (
-                  <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm mr-2">
+                  <span class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full text-sm mr-2">
                     {tag}
                   </span>
                 ))}
               </div>
-              <p class="text-gray-600">{post.excerpt}</p>
+              <p class="text-gray-600 dark:text-gray-300">{post.excerpt}</p>
               <a
                 href={`/blog/${post.slug}`}
-                class="inline-block mt-4 text-blue-600 hover:text-blue-800 transition-colors"
+                class="inline-block mt-4 text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300"
               >
-                {t("blog.readMore", locale)}
+                {t("blog.readMore", locale)} →
               </a>
             </article>
           ))}

@@ -260,4 +260,80 @@
 
 .mobile-menu-leave {
   animation: slideInLeft 0.3s ease-out forwards;
-} 
+}
+
+/* 夜间模式基础样式 */
+.dark .prose {
+  @apply max-w-none;
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+  @apply text-white;
+}
+
+.dark .prose p,
+.dark .prose ul,
+.dark .prose ol,
+.dark .prose li {
+  @apply text-gray-200;
+}
+
+.dark .prose a {
+  @apply text-blue-400 hover:text-blue-300;
+}
+
+.dark .prose code {
+  @apply bg-gray-800 text-gray-200;
+}
+
+/* 命令样式增强 - 简化 */
+.dark code {
+  @apply text-green-300;
+}
+
+/* 添加代码样式 */
+.markdown code:not(pre code) {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875em;
+}
+
+.dark .markdown code:not(pre code) {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+/* 添加代码块样式 */
+.markdown pre {
+  background-color: #f8fafc;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  margin: 1.5rem 0;
+}
+
+.dark .markdown pre {
+  background-color: #0f172a;
+  border-color: #334155;
+}
+
+.markdown pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #0f172a;
+}
+
+.dark .markdown pre code {
+  color: #e2e8f0;
+}

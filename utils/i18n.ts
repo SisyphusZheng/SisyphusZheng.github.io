@@ -324,7 +324,7 @@ export const translations: TranslationType = {
             "基于Deno和Fresh框架，使用岛屿架构（Islands Architecture）实现高性能渲染，最小化客户端JavaScript。",
         },
         {
-          icon: "��",
+          icon: "🌏",
           title: "多语言支持",
           description:
             "内置国际化系统，轻松支持多语言内容，自动根据用户语言设置切换显示内容。",
@@ -365,7 +365,7 @@ export const translations: TranslationType = {
         },
         {
           title: "2. 启动开发服务器",
-          code: "cd my-website\ndeno task start",
+          code: "cd my-website && deno task start",
         },
         {
           title: "3. 创建内容",
@@ -578,11 +578,11 @@ export const translations: TranslationType = {
         },
         {
           title: "2. Start Development Server",
-          code: "cd my-website\ndeno task start",
+          code: "cd my-website && deno task start",
         },
         {
           title: "3. Create Content",
-          code: "# Create Markdown files in the blog directory\ntouch blog/my-first-post.md",
+          code: "touch blog/my-first-post.md",
         },
       ],
       cta: {

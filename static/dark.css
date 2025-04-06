@@ -1,0 +1,60 @@
+/* 添加暗色模式下命令显示区域的样式优化 */
+.dark code {
+  color: #f8fafc;
+}
+
+/* 其他暗色模式样式 */
+.dark .markdown h1,
+.dark .markdown h2,
+.dark .markdown h3,
+.dark .markdown h4,
+.dark .markdown h5,
+.dark .markdown h6 {
+  color: #f8fafc;
+}
+
+.dark .markdown p,
+.dark .markdown ul,
+.dark .markdown ol,
+.dark .markdown li {
+  color: #cbd5e1;
+}
+
+.dark .markdown a {
+  color: #60a5fa;
+}
+
+.dark .markdown a:hover {
+  color: #93c5fd;
+}
+
+.dark .markdown blockquote {
+  border-left-color: #475569;
+  color: #94a3b8;
+}
+
+.dark .markdown pre {
+  background-color: #1e293b;
+}
+
+.dark .markdown code {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+
+.dark .markdown table {
+  border-color: #475569;
+}
+
+.dark .markdown th {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+.dark .markdown td {
+  border-color: #475569;
+}
+
+.dark .markdown hr {
+  border-color: #475569;
+}

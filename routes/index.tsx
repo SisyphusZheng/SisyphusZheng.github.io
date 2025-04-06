@@ -193,8 +193,10 @@ export default function Home({
           {quickStartSteps.map((step) => (
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 mb-8">
               <h3 class="text-xl font-semibold mb-4">{step.title}</h3>
-              <div class="bg-gray-800 text-gray-200 p-4 rounded-md font-mono text-sm overflow-x-auto">
-                <code>{step.code}</code>
+              <div class="overflow-x-auto">
+                <code class="font-mono text-gray-800 dark:text-gray-200">
+                  $ {step.code}
+                </code>
               </div>
             </div>
           ))}

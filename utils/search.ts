@@ -1,6 +1,6 @@
 import { siteConfig } from "../data/config.ts";
 import { currentLocale, Locale } from "./i18n.ts";
-// 移除服务器端导入
+// Remove server-side imports
 // import { getAllPosts } from "./blog.ts";
 // import { getAllProjects } from "./projects.ts";
 

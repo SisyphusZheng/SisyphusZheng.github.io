@@ -1,6 +1,6 @@
 /**
- * 搜索索引监控钩子
- * 确保search-index.json文件存在且是最新的
+ * Hook to ensure the search index exists and is up to date
+ * Useful when using search functionality
  */
 
 import { exists } from "https://deno.land/std@0.167.0/fs/exists.ts";
@@ -12,7 +12,7 @@ export async function ensureSearchIndex() {
     const indexExists = await exists("./static/search-index.json");
 
     if (!indexExists) {
-      console.log("⚠️ 搜索索引文件不存在，正在生成...");
+      console.log("⚠️ Search index file does not exist, generating...");
 
       // 运行索引生成脚本
       const process = Deno.run({
@@ -25,15 +25,15 @@ export async function ensureSearchIndex() {
 
       if (!status.success) {
         const stderr = new TextDecoder().decode(await process.stderrOutput());
-        console.error("❌ 搜索索引生成失败:", stderr);
+        console.error("❌ Search index generation failed:", stderr);
       } else {
-        console.log("✅ 搜索索引生成成功");
+        console.log("✅ Search index generation successful");
       }
 
       process.close();
     }
   } catch (error) {
-    console.error("检查搜索索引时出错:", error);
+    console.error("Error checking search index:", error);
   }
 }
 
@@ -50,15 +50,17 @@ export function watchContentChanges() {
       (async () => {
         for await (const event of watcher) {
           if (event.kind === "modify" || event.kind === "create") {
-            console.log("🔄 检测到内容变化，将更新搜索索引...");
+            console.log("🔄 Detected content change, updating search index...");
             await debouncedEnsureSearchIndex();
           }
         }
       })();
 
-      console.log("👀 已启动内容变化监控，将自动更新搜索索引");
+      console.log(
+        "👀 Content change monitoring started, search index will be automatically updated"
+      );
     } catch (error) {
-      console.error("设置文件监控时出错:", error);
+      console.error("Error setting file monitoring:", error);
     }
   }
 }

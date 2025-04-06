@@ -29,32 +29,32 @@ export default function Resume({ data }: { data: { locale?: Locale } }) {
   return (
     <Layout title={t("nav.resume", effectiveLocale)}>
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
           <div class="p-6">
-            <h1 class="text-4xl font-bold mb-8">
+            <h1 class="text-4xl font-bold mb-8 dark:text-white">
               {t("nav.resume", effectiveLocale)}
             </h1>
 
             {/* 基本信息 */}
             <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
+              <h2 class="text-2xl font-bold mb-4 dark:text-white">
                 {t("resume.basicInfo", effectiveLocale)}
               </h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p class="text-gray-600">
+                  <p class="text-gray-600 dark:text-gray-300">
                     {t("resume.name", effectiveLocale)}: John Doe
                   </p>
-                  <p class="text-gray-600">
+                  <p class="text-gray-600 dark:text-gray-300">
                     {t("resume.education", effectiveLocale)}: Bachelor of
                     Computer Science
                   </p>
                 </div>
                 <div>
-                  <p class="text-gray-600">
+                  <p class="text-gray-600 dark:text-gray-300">
                     {t("resume.email", effectiveLocale)}: example@example.com
                   </p>
-                  <p class="text-gray-600">
+                  <p class="text-gray-600 dark:text-gray-300">
                     {t("resume.github", effectiveLocale)}: github.com/example
                   </p>
                 </div>
@@ -63,7 +63,7 @@ export default function Resume({ data }: { data: { locale?: Locale } }) {
 
             {/* 技能 */}
             <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
+              <h2 class="text-2xl font-bold mb-4 dark:text-white">
                 {t("resume.skills", effectiveLocale)}
               </h2>
               <div class="flex flex-wrap gap-2">
@@ -75,7 +75,7 @@ export default function Resume({ data }: { data: { locale?: Locale } }) {
                   "React",
                   "Node.js",
                 ].map((skill) => (
-                  <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                  <span class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm">
                     {skill}
                   </span>
                 ))}
@@ -84,13 +84,15 @@ export default function Resume({ data }: { data: { locale?: Locale } }) {
 
             {/* 项目经验 */}
             <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
+              <h2 class="text-2xl font-bold mb-4 dark:text-white">
                 {t("resume.projects", effectiveLocale)}
               </h2>
               <div class="space-y-4">
                 <div class="border-l-4 border-blue-500 pl-4">
-                  <h3 class="text-xl font-semibold">FreshPress</h3>
-                  <p class="text-gray-600">
+                  <h3 class="text-xl font-semibold dark:text-white">
+                    FreshPress
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-300">
                     {t("resume.projectDescription", effectiveLocale)}
                   </p>
                 </div>
@@ -99,15 +101,17 @@ export default function Resume({ data }: { data: { locale?: Locale } }) {
 
             {/* 工作经验 */}
             <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
+              <h2 class="text-2xl font-bold mb-4 dark:text-white">
                 {t("resume.experience", effectiveLocale)}
               </h2>
               <div class="space-y-6">
                 <div class="border-l-4 border-purple-500 pl-4">
-                  <h3 class="text-xl font-semibold">Web Developer</h3>
-                  <p class="text-gray-600">XYZ Company</p>
-                  <p class="text-gray-500">2020 - Present</p>
-                  <ul class="list-disc pl-6 mt-2 text-gray-600">
+                  <h3 class="text-xl font-semibold dark:text-white">
+                    Web Developer
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-300">XYZ Company</p>
+                  <p class="text-gray-500 dark:text-gray-400">2020 - Present</p>
+                  <ul class="list-disc pl-6 mt-2 text-gray-600 dark:text-gray-300">
                     <li>{t("resume.responsibility1", effectiveLocale)}</li>
                     <li>{t("resume.responsibility2", effectiveLocale)}</li>
                   </ul>

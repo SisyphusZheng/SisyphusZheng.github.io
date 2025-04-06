@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run -A
 /**
- * FreshPress静态站点生成脚本
- * 用于构建包含所有页面的静态HTML输出
+ * FreshPress Static Site Generator
+ * For building static HTML output containing all pages
  */
 import { walk } from "https://deno.land/std@0.167.0/fs/walk.ts";
 import { ensureDir } from "https://deno.land/std@0.167.0/fs/ensure_dir.ts";
@@ -16,7 +16,7 @@ import { copy } from "https://deno.land/std@0.167.0/fs/copy.ts";
 import { getAllPosts, parseFrontMatter } from "../utils/blog.ts";
 import { siteConfig } from "../data/config.ts";
 
-// 配置
+// Config
 const OUTPUT_DIR = "./dist";
 const SERVER_URL = "http://localhost:8000";
 const ROUTES_DIR = "./routes";
@@ -24,29 +24,29 @@ const STATIC_DIR = "./static";
 const LOCALES = ["zh-CN", "en-US"];
 
 async function main() {
-  console.log("🍋 FreshPress 静态站点生成器启动中...");
+  console.log("🍋 FreshPress Static Site Generator starting...");
 
-  // 确保输出目录存在
+  // Ensure the output directory exists
   await ensureDir(OUTPUT_DIR);
 
-  // 启动Fresh服务器
-  console.log("🚀 启动开发服务器...");
+  // Start Fresh server
+  console.log("🚀 Starting development server...");
   const freshProcess = Deno.run({
     cmd: ["deno", "task", "start"],
     stdout: "piped",
     stderr: "piped",
   });
 
-  // 等待服务器启动
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // Wait for server to start
+  await waitForServerReady(PORT);
 
   try {
-    // 复制静态文件
-    console.log("📂 复制静态资源...");
+    // Copy static files
+    console.log("📂 Copying static resources...");
     await copy(STATIC_DIR, join(OUTPUT_DIR, "static"), { overwrite: true });
 
-    // 生成搜索索引
-    console.log("🔍 生成搜索索引...");
+    // Generate search index
+    console.log("🔍 Generating search index...");
     const searchIndexProcess = Deno.run({
       cmd: ["deno", "run", "-A", "scripts/generate-search-index.ts"],
       stdout: "piped",
@@ -55,18 +55,18 @@ async function main() {
 
     const searchIndexStatus = await searchIndexProcess.status();
     if (!searchIndexStatus.success) {
-      console.error("❌ 生成搜索索引失败");
+      console.error("❌ Generating search index failed");
       const stderr = new TextDecoder().decode(
         await searchIndexProcess.stderrOutput()
       );
       console.error(stderr);
     } else {
-      console.log("✅ 搜索索引生成成功");
+      console.log("✅ Search index generated successfully");
     }
     searchIndexProcess.close();
 
-    // 获取所有路由
-    console.log("🗺️ 分析路由...");
+    // Get all routes
+    console.log("🗺️ Analyzing routes...");
     const routeFiles = [];
     for await (const entry of walk(ROUTES_DIR)) {
       if (
@@ -78,23 +78,23 @@ async function main() {
       }
     }
 
-    // 生成页面列表
+    // Generate page list
     const pagesToRender = [];
 
-    // 添加主页和基本页面
+    // Add home and basic pages
     pagesToRender.push("/");
     pagesToRender.push("/blog");
     pagesToRender.push("/projects");
 
-    // 获取所有博客文章
+    // Get all blog posts
     const blogPosts = await getAllPosts();
 
-    // 为每个博客文章添加页面
+    // Add page for each blog post
     for (const post of blogPosts) {
       pagesToRender.push(`/blog/${post.slug}`);
     }
 
-    // 项目页面
+    // Project pages
     for (const project of siteConfig.projects.items) {
       const slug = project.title
         .toLowerCase()
@@ -103,7 +103,7 @@ async function main() {
       pagesToRender.push(`/projects/${slug}`);
     }
 
-    // 多语言支持
+    // Multilingual support
     const allPages = [];
     for (const page of pagesToRender) {
       for (const locale of LOCALES) {
@@ -114,12 +114,12 @@ async function main() {
       }
     }
 
-    // 创建一个进度条
+    // Create a progress bar
     let completed = 0;
     const total = allPages.length;
 
-    // 渲染所有页面
-    console.log(`🔨 开始生成${total}个页面...`);
+    // Render all pages
+    console.log(`🔨 Starting to generate ${total} pages...`);
 
     for (const { url, locale } of allPages) {
       const outputPath =
@@ -127,43 +127,43 @@ async function main() {
           ? join(OUTPUT_DIR, locale, "index.html")
           : join(OUTPUT_DIR, locale, url, "index.html");
 
-      // 确保目录存在
+      // Ensure directory exists
       await ensureDir(dirname(outputPath));
 
       try {
-        // 构建完整URL(加上语言参数)
+        // Build full URL (with language parameter)
         const fullUrl = `${SERVER_URL}${url}?locale=${locale}`;
 
-        // 获取页面HTML
+        // Get page HTML
         const response = await fetch(fullUrl);
         if (!response.ok) {
           console.error(
-            `❌ 无法获取页面 ${url} (${locale}): ${response.status} ${response.statusText}`
+            `❌ Unable to get page ${url} (${locale}): ${response.status} ${response.statusText}`
           );
           continue;
         }
 
-        // 获取HTML内容
+        // Get HTML content
         const html = await response.text();
 
-        // 保存HTML文件
+        // Save HTML file
         await Deno.writeTextFile(outputPath, html);
 
-        // 更新进度
+        // Update progress
         completed++;
         const percent = Math.floor((completed / total) * 100);
         const progressBar =
           "█".repeat(Math.floor(percent / 2)) +
           "░".repeat(50 - Math.floor(percent / 2));
         console.log(
-          `[${progressBar}] ${percent}% (${completed}/${total}) - 生成 ${locale}${url}`
+          `[${progressBar}] ${percent}% (${completed}/${total}) - Generating ${locale}${url}`
         );
       } catch (error) {
-        console.error(`❌ 渲染 ${url} (${locale}) 时出错:`, error);
+        console.error(`❌ Rendering ${url} (${locale}) failed:`, error);
       }
     }
 
-    // 为每个语言创建重定向文件
+    // Create redirect file for each language
     for (const locale of LOCALES) {
       const redirectHtml = `
         <!DOCTYPE html>
@@ -183,29 +183,29 @@ async function main() {
       await Deno.writeTextFile(join(OUTPUT_DIR, "index.html"), redirectHtml);
     }
 
-    // 生成站点地图
+    // Generate site map
     await generateSitemap(allPages);
 
-    console.log("✅ 静态站点生成完成!");
+    console.log("✅ Static site generation completed!");
   } catch (error) {
-    console.error("❌ 生成过程中出错:", error);
+    console.error("❌ Error during generation:", error);
   } finally {
-    // 关闭服务器
+    // Close server
     freshProcess.kill("SIGTERM");
     freshProcess.close();
   }
 }
 
-// 生成站点地图
+// Generate site map
 async function generateSitemap(pages) {
-  console.log("🗺️ 生成站点地图...");
+  console.log("🗺️ Generating site map...");
 
   const siteUrl = siteConfig.site.url || "https://example.com";
 
   let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
   sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-  // 添加所有页面到站点地图
+  // Add all pages to site map
   for (const { url, locale } of pages) {
     const fullUrl = `${siteUrl}/${locale}${url === "/" ? "" : url}`;
 
@@ -213,7 +213,7 @@ async function generateSitemap(pages) {
     sitemap += `    <loc>${fullUrl}</loc>\n`;
     sitemap += "    <lastmod>" + new Date().toISOString() + "</lastmod>\n";
 
-    // 首页更高的优先级
+    // Higher priority for home page
     if (url === "/") {
       sitemap += "    <priority>1.0</priority>\n";
     } else if (url.startsWith("/blog/")) {
@@ -230,7 +230,7 @@ async function generateSitemap(pages) {
   await Deno.writeTextFile(join(OUTPUT_DIR, "sitemap.xml"), sitemap);
 }
 
-// 启动主函数
+// Start main function
 if (import.meta.main) {
-  main();
+  main().catch(console.error);
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run -A
 /**
- * 开发环境下的搜索索引生成器
- * 简化版本，优化速度，支持快速启动开发服务器
+ * Search index generator for development environment
+ * Simplified version for faster startup of the development server
  */
 import { ensureDir } from "https://deno.land/std@0.167.0/fs/ensure_dir.ts";
 import { getAllPosts } from "../utils/blog.ts";

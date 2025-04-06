@@ -4,6 +4,16 @@ A modern static site generator based on the Fresh framework, designed specifical
 
 [![Made with Fresh](https://fresh.deno.dev/fresh-badge.svg)](https://fresh.deno.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![deno module](https://shield.deno.dev/x/freshpress)](https://deno.land/x/freshpress)
+[![nest.land](https://nest.land/badge.svg)](https://nest.land/package/freshpress)
+
+## 🆕 What's New in v0.2.0
+
+- 🌙 **Enhanced Dark Mode**: Improved dark theme support with better contrast and readability
+- 🔍 **Search System**: New search functionality for better content discovery
+- 📱 **Responsive Improvements**: Better mobile experience and layout adjustments
+- 🌐 **i18n Enhancements**: Language switching with improved URL handling
+- 🐛 **Bug Fixes**: Fixed various issues with Markdown rendering and navigation
 
 ## ✨ Features
 
