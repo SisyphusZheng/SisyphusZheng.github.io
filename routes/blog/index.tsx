@@ -2,6 +2,7 @@ import { Handlers } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
 import { siteConfig } from "../../data/config.ts";
 import { getAllPosts, Post } from "../../utils/blog.ts";
+import { t, currentLocale, type Locale, formatDate } from "../../utils/i18n.ts";
 
 function parseFrontMatter(content: string): {
   attrs: Record<string, any>;
@@ -37,18 +38,29 @@ function parseFrontMatter(content: string): {
 }
 
 export const handler: Handlers<Post[]> = {
-  async GET(_req, ctx) {
+  async GET(req, ctx) {
+    // 从URL获取语言参数
+    const url = new URL(req.url);
+    const langParam = url.searchParams.get("lang");
+    const locale =
+      langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
+
     const posts = await getAllPosts();
     return ctx.render(posts);
   },
 };
 
 export default function BlogIndex({ data }: { data: Post[] }) {
+  // 使用当前语言设置
+  const locale = currentLocale.value;
+
   return (
     <Layout>
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 class="text-4xl font-bold mb-8">{siteConfig.blog.title}</h1>
-        <p class="text-xl text-gray-600 mb-8">{siteConfig.blog.description}</p>
+        <h1 class="text-4xl font-bold mb-8">{t("blog.title", locale)}</h1>
+        <p class="text-xl text-gray-600 mb-8">
+          {t("blog.description", locale)}
+        </p>
 
         <div class="space-y-8">
           {data.map((post) => (
@@ -62,7 +74,7 @@ export default function BlogIndex({ data }: { data: Post[] }) {
                 </a>
               </h2>
               <div class="text-gray-500 mb-4">
-                {new Date(post.date).toLocaleDateString()} ·{" "}
+                {formatDate(post.date, locale)} ·{" "}
                 {post.tags.map((tag) => (
                   <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm mr-2">
                     {tag}
@@ -74,7 +86,7 @@ export default function BlogIndex({ data }: { data: Post[] }) {
                 href={`/blog/${post.slug}`}
                 class="inline-block mt-4 text-blue-600 hover:text-blue-800 transition-colors"
               >
-                {siteConfig.blog.readMore}
+                {t("blog.readMore", locale)}
               </a>
             </article>
           ))}

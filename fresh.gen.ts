@@ -2,7 +2,6 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $about from "./routes/about.tsx";
 import * as $blog_slug_ from "./routes/blog/[slug].tsx";
 import * as $blog_index from "./routes/blog/index.tsx";
 import * as $index from "./routes/index.tsx";
@@ -19,7 +18,6 @@ import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/about.tsx": $about,
     "./routes/blog/[slug].tsx": $blog_slug_,
     "./routes/blog/index.tsx": $blog_index,
     "./routes/index.tsx": $index,

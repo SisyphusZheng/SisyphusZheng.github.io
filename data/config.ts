@@ -14,7 +14,6 @@ export const siteConfig = {
     blog: "Blog",
     projects: "Projects",
     resume: "Resume",
-    about: "About",
   },
 
   // Hero section
@@ -267,7 +266,6 @@ export const siteConfig = {
       { text: "Home", url: "/" },
       { text: "Blog", url: "/blog" },
       { text: "Projects", url: "/projects" },
-      { text: "About", url: "/about" },
       { text: "GitHub", url: "https://github.com/freshpress" },
     ],
   },

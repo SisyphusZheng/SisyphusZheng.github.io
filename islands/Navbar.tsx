@@ -1,6 +1,11 @@
 import { h } from "preact";
 import { useState, useEffect } from "preact/hooks";
-import { currentLocale, t, type Locale } from "../utils/i18n.ts";
+import {
+  currentLocale,
+  t,
+  type Locale,
+  toggleLocale as toggleLocaleGlobal,
+} from "../utils/i18n.ts";
 import Search from "./Search.tsx";
 import ThemeToggle from "./ThemeToggle.tsx";
 
@@ -11,7 +16,19 @@ export default function Navbar() {
 
   // Monitor language changes
   useEffect(() => {
-    setLocale(currentLocale.value);
+    const updateLocale = () => {
+      setLocale(currentLocale.value);
+    };
+
+    // 初始设置语言
+    updateLocale();
+
+    // 监听语言变化事件
+    window.addEventListener("localeChange", updateLocale);
+
+    return () => {
+      window.removeEventListener("localeChange", updateLocale);
+    };
   }, []);
 
   const toggleMenu = () => {
@@ -24,10 +41,9 @@ export default function Navbar() {
   };
 
   const toggleLocale = () => {
-    const newLocale = locale === "zh-CN" ? "en-US" : "zh-CN";
-    console.log("Toggle language", newLocale);
-    currentLocale.value = newLocale;
-    setLocale(newLocale);
+    console.log("切换语言");
+    // 直接调用i18n.ts中的toggleLocale函数
+    toggleLocaleGlobal();
   };
 
   // Close search when ESC is pressed
@@ -92,12 +108,6 @@ export default function Navbar() {
               class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
             >
               {t("nav.projects")}
-            </a>
-            <a
-              href="/about"
-              class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
-            >
-              {t("nav.about")}
             </a>
             <a
               href="/resume"
@@ -201,12 +211,6 @@ export default function Navbar() {
               class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
             >
               {t("nav.projects")}
-            </a>
-            <a
-              href="/about"
-              class="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
-            >
-              {t("nav.about")}
             </a>
             <a
               href="/resume"

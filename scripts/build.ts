@@ -63,7 +63,6 @@ async function main() {
 
     // 添加主页和基本页面
     pagesToRender.push("/");
-    pagesToRender.push("/about");
     pagesToRender.push("/blog");
     pagesToRender.push("/projects");
 

@@ -12,7 +12,13 @@ import {
 import { currentLocale } from "../utils/i18n.ts";
 
 export const handler: Handlers = {
-  async GET(_req, ctx) {
+  async GET(req, ctx) {
+    // 从URL查询参数获取语言设置
+    const url = new URL(req.url);
+    const langParam = url.searchParams.get("lang");
+    const locale =
+      langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
+
     // 读取最近的博客文章
     const posts = await getAllPosts();
 
@@ -22,14 +28,14 @@ export const handler: Handlers = {
     // 获取最新的项目
     const latestProject = siteConfig.projects.items[0];
 
-    // 获取功能列表
-    const features = getFeatures();
+    // 获取功能列表 - 传入语言参数
+    const features = getFeatures(locale);
 
-    // 获取快速开始步骤
-    const quickStartSteps = getQuickStartSteps();
+    // 获取快速开始步骤 - 传入语言参数
+    const quickStartSteps = getQuickStartSteps(locale);
 
-    // 获取更新日志
-    const changelogVersions = getChangelogVersions();
+    // 获取更新日志 - 传入语言参数
+    const changelogVersions = getChangelogVersions(locale);
 
     return ctx.render({
       latestPost,
@@ -37,6 +43,7 @@ export const handler: Handlers = {
       features,
       quickStartSteps,
       changelogVersions,
+      locale,
     });
   },
 };
@@ -50,6 +57,7 @@ export default function Home({
     features: any[];
     quickStartSteps: any[];
     changelogVersions: any[];
+    locale?: Locale;
   };
 }) {
   const {
@@ -58,17 +66,21 @@ export default function Home({
     features,
     quickStartSteps,
     changelogVersions,
+    locale,
   } = data;
+
+  // 使用从服务器传来的locale，如果存在的话
+  const effectiveLocale = locale || currentLocale.value;
 
   return (
     <Layout>
-      <Hero />
+      <Hero locale={effectiveLocale} />
 
       {/* 主要特性展示 */}
       <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
-            {getContent(["features", "title"])}
+            {getContent(["features", "title"], effectiveLocale)}
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature) => (
@@ -88,14 +100,14 @@ export default function Home({
       <section class="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
-            {getContent(["news", "title"])}
+            {getContent(["news", "title"], effectiveLocale)}
           </h2>
           <div class="grid md:grid-cols-2 gap-8">
             {/* 最新博客文章 */}
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
               <h3 class="text-xl font-semibold mb-4">
                 <span class="text-blue-500">📰</span>{" "}
-                {getContent(["news", "blog", "title"])}
+                {getContent(["news", "blog", "title"], effectiveLocale)}
               </h3>
               {latestPost ? (
                 <>
@@ -109,7 +121,7 @@ export default function Home({
                   </h4>
                   <p class="text-gray-500 dark:text-gray-400 mb-2">
                     {new Date(latestPost.date).toLocaleDateString(
-                      currentLocale.value === "zh-CN" ? "zh-CN" : "en-US",
+                      effectiveLocale === "zh-CN" ? "zh-CN" : "en-US",
                       { year: "numeric", month: "short", day: "numeric" }
                     )}
                   </p>
@@ -121,7 +133,7 @@ export default function Home({
                     href={`/blog/${latestPost.slug}`}
                     class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
                   >
-                    {getContent(["news", "blog", "readMore"])}
+                    {getContent(["news", "blog", "readMore"], effectiveLocale)}
                     <svg
                       class="w-4 h-4 ml-1"
                       fill="none"
@@ -146,7 +158,7 @@ export default function Home({
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
               <h3 class="text-xl font-semibold mb-4">
                 <span class="text-blue-500">📋</span>{" "}
-                {getContent(["news", "updates", "title"])}
+                {getContent(["news", "updates", "title"], effectiveLocale)}
               </h3>
               <div class="space-y-4">
                 {changelogVersions.map((version) => (
@@ -172,10 +184,10 @@ export default function Home({
       <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-8 animate-fade-in">
-            {getContent(["quickStart", "title"])}
+            {getContent(["quickStart", "title"], effectiveLocale)}
           </h2>
           <p class="text-center text-lg mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-300">
-            {getContent(["quickStart", "subtitle"])}
+            {getContent(["quickStart", "subtitle"], effectiveLocale)}
           </p>
 
           {quickStartSteps.map((step) => (
@@ -189,14 +201,14 @@ export default function Home({
 
           <div class="text-center mt-12">
             <a
-              href={getContent(["quickStart", "cta", "link"])}
+              href={getContent(["quickStart", "cta", "link"], effectiveLocale)}
               class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
               target="_blank"
             >
               <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
-              {getContent(["quickStart", "cta", "text"])}
+              {getContent(["quickStart", "cta", "text"], effectiveLocale)}
             </a>
           </div>
         </div>

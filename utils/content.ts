@@ -1,9 +1,8 @@
-import { currentLocale, type Locale } from "./i18n.ts";
-import siteContentJson from "../data/siteContent.json" with { type: "json" };
+import { currentLocale, type Locale, translations } from "./i18n.ts";
 
 // 类型定义
 type ContentPath = string[];
-type SiteContent = typeof siteContentJson;
+type SiteContent = typeof translations;
 
 /**
  * 获取指定路径的内容
@@ -14,11 +13,12 @@ type SiteContent = typeof siteContentJson;
 export function getContent(path: ContentPath, locale?: Locale): any {
   try {
     const lang = (locale ||
-      (typeof currentLocale !== "undefined" ? currentLocale.value : "en-US")
-    ) as keyof typeof siteContentJson;
+      (typeof currentLocale !== "undefined"
+        ? currentLocale.value
+        : "en-US")) as keyof typeof translations;
 
-    // 从JSON中获取指定语言的内容
-    let content = siteContentJson[lang];
+    // 从translations中获取指定语言的内容，而不是从siteContentJson
+    let content = translations[lang];
 
     // 遍历路径获取内容
     for (const key of path) {
@@ -26,9 +26,7 @@ export function getContent(path: ContentPath, locale?: Locale): any {
         content = content[key as keyof typeof content];
       } else {
         console.warn(
-          `Content not found for path: ${path.join(
-            "."
-          )} in locale: ${lang}`
+          `Content not found for path: ${path.join(".")} in locale: ${lang}`
         );
         return undefined;
       }

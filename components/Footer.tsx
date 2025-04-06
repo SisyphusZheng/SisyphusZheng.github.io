@@ -45,10 +45,10 @@ export default function Footer() {
                 </li>
                 <li>
                   <a
-                    href="/about"
+                    href="/resume"
                     class="text-gray-300 hover:text-white transition-colors"
                   >
-                    {getContent(["nav", "about"])}
+                    {getContent(["nav", "resume"])}
                   </a>
                 </li>
               </ul>

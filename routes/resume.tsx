@@ -1,210 +1,118 @@
+import { Handlers } from "$fresh/server.ts";
 import Layout from "../components/Layout.tsx";
-import { siteConfig } from "../data/config.ts";
-import { t, currentLocale } from "../utils/i18n.ts";
+import { t, currentLocale, type Locale } from "../utils/i18n.ts";
 
-export default function Resume() {
-  const { resume } = siteConfig;
+// 可以定义一个简单的简历数据结构，以后可以扩展
+interface ResumeSection {
+  title: string;
+  items: Array<any>;
+}
 
-  // 如果resume对象不存在，显示错误信息
-  if (!resume) {
-    return (
-      <Layout title={t("nav.resume")}>
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <h1 class="text-3xl font-bold text-red-600">
-            {t("errors.notFound")}
-          </h1>
-          <p class="mt-4 text-lg text-gray-600">{t("errors.pageNotFound")}</p>
-          <a
-            href="/"
-            class="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded-md"
-          >
-            {t("errors.returnHome")}
-          </a>
-        </div>
-      </Layout>
-    );
-  }
+export const handler: Handlers = {
+  async GET(req, ctx) {
+    // 从URL获取语言参数
+    const url = new URL(req.url);
+    const langParam = url.searchParams.get("lang");
+    const locale =
+      langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
 
+    return ctx.render({ locale });
+  },
+};
+
+export default function Resume({ data }: { data: { locale?: Locale } }) {
+  // 使用传入的locale或默认locale
+  const effectiveLocale = data.locale || currentLocale.value;
+
+  // 以下内容应该从i18n翻译系统获取
+  // 这部分应该添加到utils/i18n.ts的翻译文件中
   return (
-    <Layout title={resume.title}>
+    <Layout title={t("nav.resume", effectiveLocale)}>
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
           <div class="p-6">
-            <h1 class="text-4xl font-bold mb-8">{resume.title}</h1>
+            <h1 class="text-4xl font-bold mb-8">
+              {t("nav.resume", effectiveLocale)}
+            </h1>
 
             {/* 基本信息 */}
             <section class="mb-8">
               <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.basicInfo.title}
+                {t("resume.basicInfo", effectiveLocale)}
               </h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p class="text-gray-600">
-                    姓名：{resume.sections.basicInfo.items.name}
+                    {t("resume.name", effectiveLocale)}: John Doe
                   </p>
                   <p class="text-gray-600">
-                    学历：{resume.sections.basicInfo.items.education}
-                  </p>
-                  <p class="text-gray-600">
-                    状态：{resume.sections.basicInfo.items.status}
+                    {t("resume.education", effectiveLocale)}: Bachelor of
+                    Computer Science
                   </p>
                 </div>
                 <div>
                   <p class="text-gray-600">
-                    邮箱：{resume.sections.basicInfo.items.email}
+                    {t("resume.email", effectiveLocale)}: example@example.com
                   </p>
                   <p class="text-gray-600">
-                    电话：{resume.sections.basicInfo.items.phone}
-                  </p>
-                  <p class="text-gray-600">
-                    GitHub：{resume.sections.basicInfo.items.github}
+                    {t("resume.github", effectiveLocale)}: github.com/example
                   </p>
                 </div>
               </div>
             </section>
 
-            {/* 教育背景 */}
+            {/* 技能 */}
             <section class="mb-8">
               <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.education.title}
+                {t("resume.skills", effectiveLocale)}
               </h2>
-              <div class="space-y-6">
-                {resume.sections.education.items.map((edu, index) => (
-                  <div
-                    key={`edu-${index}`}
-                    class="border-l-4 border-blue-500 pl-4"
-                  >
-                    <h3 class="text-xl font-semibold">{edu.school}</h3>
-                    <p class="text-gray-600">{edu.degree}</p>
-                    <p class="text-gray-500">{edu.period}</p>
-                    <ul class="list-disc pl-6 mt-2 text-gray-600">
-                      {edu.courses.map((course, i) => (
-                        <li key={`course-${i}`}>{course}</li>
-                      ))}
-                    </ul>
-                  </div>
+              <div class="flex flex-wrap gap-2">
+                {[
+                  "TypeScript",
+                  "JavaScript",
+                  "HTML",
+                  "CSS",
+                  "React",
+                  "Node.js",
+                ].map((skill) => (
+                  <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                    {skill}
+                  </span>
                 ))}
-              </div>
-            </section>
-
-            {/* 技术栈 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.skills.title}
-              </h2>
-              <div class="space-y-6">
-                {Object.entries(resume.sections.skills.categories).map(
-                  ([key, category]) => (
-                    <div key={key}>
-                      <h3 class="text-xl font-semibold mb-2">
-                        {category.title}
-                      </h3>
-                      <div class="flex flex-wrap gap-2">
-                        {category.items.map((skill, i) => (
-                          <span
-                            key={`skill-${key}-${i}`}
-                            class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                )}
               </div>
             </section>
 
             {/* 项目经验 */}
             <section class="mb-8">
               <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.projects.title}
+                {t("resume.projects", effectiveLocale)}
               </h2>
-              <div class="space-y-6">
-                {resume.sections.projects.items.map((project, index) => (
-                  <div
-                    key={`proj-${index}`}
-                    class="border-l-4 border-green-500 pl-4"
-                  >
-                    <h3 class="text-xl font-semibold">
-                      <a
-                        href={project.url}
-                        class="text-blue-600 hover:text-blue-800"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {project.name}
-                      </a>
-                    </h3>
-                    <p class="text-gray-600 mt-2">{project.description}</p>
-                    <ul class="list-disc pl-6 mt-2 text-gray-600">
-                      {project.highlights.map((highlight, i) => (
-                        <li key={`proj-highlight-${i}`}>{highlight}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+              <div class="space-y-4">
+                <div class="border-l-4 border-blue-500 pl-4">
+                  <h3 class="text-xl font-semibold">FreshPress</h3>
+                  <p class="text-gray-600">
+                    {t("resume.projectDescription", effectiveLocale)}
+                  </p>
+                </div>
               </div>
             </section>
 
-            {/* 工作经历 */}
+            {/* 工作经验 */}
             <section class="mb-8">
               <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.experience.title}
+                {t("resume.experience", effectiveLocale)}
               </h2>
               <div class="space-y-6">
-                {resume.sections.experience.items.map((exp, index) => (
-                  <div
-                    key={`exp-${index}`}
-                    class="border-l-4 border-purple-500 pl-4"
-                  >
-                    <h3 class="text-xl font-semibold">{exp.organization}</h3>
-                    <p class="text-gray-600">{exp.position}</p>
-                    <p class="text-gray-500">{exp.period}</p>
-                    <ul class="list-disc pl-6 mt-2 text-gray-600">
-                      {exp.highlights.map((highlight, i) => (
-                        <li key={`exp-highlight-${i}`}>{highlight}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                <div class="border-l-4 border-purple-500 pl-4">
+                  <h3 class="text-xl font-semibold">Web Developer</h3>
+                  <p class="text-gray-600">XYZ Company</p>
+                  <p class="text-gray-500">2020 - Present</p>
+                  <ul class="list-disc pl-6 mt-2 text-gray-600">
+                    <li>{t("resume.responsibility1", effectiveLocale)}</li>
+                    <li>{t("resume.responsibility2", effectiveLocale)}</li>
+                  </ul>
+                </div>
               </div>
-            </section>
-
-            {/* 荣誉证书 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.achievements.title}
-              </h2>
-              <ul class="list-disc pl-6 text-gray-600">
-                {resume.sections.achievements.items.map((achievement, i) => (
-                  <li key={`achievement-${i}`}>{achievement}</li>
-                ))}
-              </ul>
-            </section>
-
-            {/* 开源贡献 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.contributions.title}
-              </h2>
-              <ul class="list-disc pl-6 text-gray-600">
-                {resume.sections.contributions.items.map((contribution, i) => (
-                  <li key={`contribution-${i}`}>{contribution}</li>
-                ))}
-              </ul>
-            </section>
-
-            {/* 技术博客 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4">
-                {resume.sections.blog.title}
-              </h2>
-              <ul class="list-disc pl-6 text-gray-600">
-                {resume.sections.blog.items.map((item, i) => (
-                  <li key={`blog-${i}`}>{item}</li>
-                ))}
-              </ul>
             </section>
           </div>
         </div>
