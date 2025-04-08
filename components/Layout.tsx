@@ -1,8 +1,8 @@
 import { Head } from "$fresh/runtime.ts";
 import Navbar from "../islands/Navbar.tsx";
 import Footer from "./Footer.tsx";
-import { t } from "../utils/i18n.ts";
-import { siteConfig } from "../data/config.ts";
+import { t } from "../plugins/i18n/mod.ts";
+import { siteConfig } from "../docs/config.ts";
 
 interface LayoutProps {
   children: preact.ComponentChildren;
@@ -20,6 +20,8 @@ export default function Layout({
       ? title
       : `${title} | ${siteConfig.site.title}`;
 
+  const author = siteConfig.site.author || "FreshPress";
+
   return (
     <>
       <Head>
@@ -27,7 +29,7 @@ export default function Layout({
         <meta name="description" content={description} />
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="author" content={siteConfig.site.author} />
+        <meta name="author" content={author} />
         <meta name="generator" content="FreshPress" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="stylesheet" href="/styles.css" />
@@ -57,6 +59,7 @@ export default function Layout({
           `,
           }}
         />
+        <script src="/fp-config.js"></script>
       </Head>
       <div class="min-h-screen flex flex-col">
         <Navbar />

@@ -1,9 +1,16 @@
-import { t } from "../utils/i18n.ts";
-import { getCopyright, getContent } from "../utils/content.ts";
+import { h } from "preact";
+import { I18nPlugin } from "../plugins/i18n/mod.ts";
+import { getContent } from "../docs/content.ts";
+
+// 创建i18n插件实例
+const i18nPlugin = new I18nPlugin();
 
 export default function Footer() {
-  const copyright = getCopyright();
+  const copyright = `© ${new Date().getFullYear()} FreshPress`;
   const githubLink = getContent(["quickStart", "cta", "link"]);
+
+  // 翻译辅助函数
+  const t = (key: string, params = {}) => i18nPlugin.translate(key, params);
 
   return (
     <footer class="bg-gray-800 text-white py-12">
@@ -22,7 +29,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="/"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                   >
                     {getContent(["nav", "home"])}
                   </a>
@@ -30,7 +37,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="/blog"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                   >
                     {getContent(["nav", "blog"])}
                   </a>
@@ -38,7 +45,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="/projects"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                   >
                     {getContent(["nav", "projects"])}
                   </a>
@@ -46,7 +53,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="/resume"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                   >
                     {getContent(["nav", "resume"])}
                   </a>
@@ -59,7 +66,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="/docs"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                   >
                     {getContent(["footer", "links", "docs"])}
                   </a>
@@ -67,7 +74,7 @@ export default function Footer() {
                 <li>
                   <a
                     href={githubLink}
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                     target="_blank"
                   >
                     {getContent(["footer", "links", "github"])}
@@ -76,7 +83,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="https://twitter.com/freshpress"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                     target="_blank"
                   >
                     {getContent(["footer", "links", "twitter"])}
@@ -85,7 +92,7 @@ export default function Footer() {
                 <li>
                   <a
                     href="https://discord.gg/freshpress"
-                    class="text-gray-300 hover:text-white transition-colors"
+                    class="text-gray-300 hover:text-white transition-colors focus:outline-none"
                     target="_blank"
                   >
                     {getContent(["footer", "links", "discord"])}
@@ -99,7 +106,7 @@ export default function Footer() {
               <div class="flex space-x-4 mt-4">
                 <a
                   href={githubLink}
-                  class="text-gray-300 hover:text-white"
+                  class="text-gray-300 hover:text-white focus:outline-none"
                   target="_blank"
                   aria-label="GitHub"
                 >
@@ -109,7 +116,7 @@ export default function Footer() {
                 </a>
                 <a
                   href="https://twitter.com/freshpress"
-                  class="text-gray-300 hover:text-white"
+                  class="text-gray-300 hover:text-white focus:outline-none"
                   target="_blank"
                   aria-label="Twitter"
                 >
@@ -119,7 +126,7 @@ export default function Footer() {
                 </a>
                 <a
                   href="https://discord.gg/freshpress"
-                  class="text-gray-300 hover:text-white"
+                  class="text-gray-300 hover:text-white focus:outline-none"
                   target="_blank"
                   aria-label="Discord"
                 >
@@ -137,7 +144,7 @@ export default function Footer() {
             {getContent(["footer", "poweredBy"])}{" "}
             <a
               href="https://fresh.deno.dev"
-              class="text-gray-300 hover:text-white inline-flex items-center"
+              class="text-gray-300 hover:text-white inline-flex items-center focus:outline-none"
             >
               <span class="mr-1">Fresh</span>
               <img

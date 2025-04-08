@@ -1,12 +1,15 @@
 import { Handlers } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
 import Markdown from "../../components/Markdown.tsx";
-import { getProjectBySlug, Project } from "../../utils/projects.ts";
+import {
+  getProjectById as getProjectBySlug,
+  Project,
+} from "../../plugins/projects/mod.ts";
 
 export const handler: Handlers<Project | null> = {
   async GET(_req, ctx) {
     const slug = ctx.params.slug;
-    const project = getProjectBySlug(slug);
+    const project = await getProjectBySlug(slug);
 
     if (!project) {
       return ctx.renderNotFound();
@@ -31,7 +34,7 @@ export default function ProjectDetail({ data }: { data: Project }) {
   return (
     <Layout>
       <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border dark:border-gray-700">
           <div class="md:flex">
             <div class="md:flex-shrink-0">
               <img
@@ -41,15 +44,20 @@ export default function ProjectDetail({ data }: { data: Project }) {
               />
             </div>
             <div class="p-6">
-              <h1 class="text-3xl font-bold mb-4">{data.title}</h1>
-              <p class="text-gray-600 mb-6">{data.description}</p>
+              <h1 class="text-3xl font-bold mb-4 dark:text-white">
+                {data.title}
+              </h1>
+              <p class="text-gray-600 dark:text-gray-300 mb-6">
+                {data.description}
+              </p>
 
               <div class="flex flex-wrap gap-2 mb-6">
-                {data.technologies.map((tech) => (
-                  <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                    {tech}
-                  </span>
-                ))}
+                {data.technologies &&
+                  data.technologies.map((tech) => (
+                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm">
+                      {tech}
+                    </span>
+                  ))}
               </div>
 
               <div class="flex space-x-4 mb-6">
@@ -58,7 +66,7 @@ export default function ProjectDetail({ data }: { data: Project }) {
                     href={data.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
                   >
                     <svg
                       class="w-5 h-5 mr-2"
@@ -97,16 +105,23 @@ export default function ProjectDetail({ data }: { data: Project }) {
             </div>
           </div>
 
-          <div class="p-6 border-t border-gray-200">
-            <h2 class="text-2xl font-bold mb-4">项目特点</h2>
+          <div class="p-6 border-t border-gray-200 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">项目特点</h2>
             <ul class="list-disc list-inside mb-6">
-              {data.features.map((feature) => (
-                <li class="text-gray-600 mb-2">{feature}</li>
-              ))}
+              {data.features &&
+                data.features.map((feature) => (
+                  <li class="text-gray-600 dark:text-gray-300 mb-2">
+                    {feature}
+                  </li>
+                ))}
             </ul>
 
-            <h2 class="text-2xl font-bold mb-4">项目详情</h2>
-            <Markdown content={data.longDescription} />
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">项目详情</h2>
+            {data.longDescription ? (
+              <Markdown content={data.longDescription} />
+            ) : (
+              <p class="text-gray-600 dark:text-gray-300">暂无详细描述</p>
+            )}
           </div>
         </div>
       </div>

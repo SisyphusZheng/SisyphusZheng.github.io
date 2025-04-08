@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { posts } from "../data/posts.ts";
+import { posts } from "../docs/posts.ts";
 import Markdown from "../components/Markdown.tsx";
 
 export default function BlogList() {

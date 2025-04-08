@@ -1,50 +1,80 @@
+import { h } from "preact";
 import { Handlers } from "$fresh/server.ts";
 import Layout from "../components/Layout.tsx";
 import Hero from "../components/Hero.tsx";
-import { siteConfig } from "../data/config.ts";
-import { getAllPosts, Post } from "../utils/blog.ts";
+import { siteConfig } from "../docs/config.ts";
+import { BlogPlugin } from "../plugins/blog/mod.ts";
+import type { BlogPost } from "../core/content.ts";
 import {
   getContent,
   getFeatures,
   getQuickStartSteps,
   getChangelogVersions,
-} from "../utils/content.ts";
-import { currentLocale } from "../utils/i18n.ts";
+  type Locale,
+} from "../docs/content.ts";
+import { I18nPlugin } from "../plugins/i18n/mod.ts";
+import { ProjectsPlugin } from "../plugins/projects/mod.ts";
+import { getProjects } from "../plugins/projects/mod.ts";
+
+// Create blog plugin instance
+const blogPlugin = new BlogPlugin();
+// Create i18n plugin instance
+const i18nPlugin = new I18nPlugin();
+const projectsPlugin = new ProjectsPlugin();
+
+// Manually set initialized to true, force activation
+blogPlugin.initialized = true;
+projectsPlugin.initialized = true;
 
 export const handler: Handlers = {
-  async GET(req, ctx) {
-    // 从URL查询参数获取语言设置
+  async GET(req: Request, ctx: any) {
+    // Get language setting from URL query parameter
     const url = new URL(req.url);
     const langParam = url.searchParams.get("lang");
     const locale =
-      langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
+      langParam === "zh-CN" || langParam === "en-US"
+        ? (langParam as Locale)
+        : "en-US";
 
-    // 读取最近的博客文章
-    const posts = await getAllPosts();
+    // Set current language for i18n plugin
+    i18nPlugin.setLocale(locale);
 
-    // 按日期排序，获取最新的文章
-    const latestPost = posts[0]; // getAllPosts已经按日期排序了
-
-    // 获取最新的项目
-    const latestProject = siteConfig.projects.items[0];
-
-    // 获取功能列表 - 传入语言参数
-    const features = getFeatures(locale);
-
-    // 获取快速开始步骤 - 传入语言参数
-    const quickStartSteps = getQuickStartSteps(locale);
-
-    // 获取更新日志 - 传入语言参数
-    const changelogVersions = getChangelogVersions(locale);
-
-    return ctx.render({
-      latestPost,
-      latestProject,
-      features,
-      quickStartSteps,
-      changelogVersions,
+    // Prepare data object
+    const data: any = {
+      features: getFeatures(locale),
+      quickStartSteps: getQuickStartSteps(locale),
+      changelogVersions: getChangelogVersions(locale),
       locale,
-    });
+    };
+
+    // Load blog posts - no condition check, load without checking plugin status
+    try {
+      const posts = await blogPlugin.loadPosts();
+      if (posts && posts.length > 0) {
+        data.latestPost = posts[0];
+      }
+    } catch (error) {
+      console.error("Failed to load blog posts:", error);
+    }
+
+    // Load projects - no condition check, load without checking plugin status
+    try {
+      // Use getProjects helper function to load projects
+      const projects = await getProjects();
+      if (projects && projects.length > 0) {
+        data.latestProject = projects[0];
+      } else if (
+        siteConfig.projects?.items &&
+        siteConfig.projects.items.length > 0
+      ) {
+        // Fallback to configured project
+        data.latestProject = siteConfig.projects.items[0];
+      }
+    } catch (error) {
+      console.error("Failed to load projects:", error);
+    }
+
+    return ctx.render(data);
   },
 };
 
@@ -52,8 +82,8 @@ export default function Home({
   data,
 }: {
   data: {
-    latestPost: Post;
-    latestProject: any;
+    latestPost?: BlogPost;
+    latestProject?: any;
     features: any[];
     quickStartSteps: any[];
     changelogVersions: any[];
@@ -69,14 +99,14 @@ export default function Home({
     locale,
   } = data;
 
-  // 使用从服务器传来的locale，如果存在的话
-  const effectiveLocale = locale || currentLocale.value;
+  // Use locale from server
+  const effectiveLocale = locale || "en-US";
 
   return (
     <Layout>
       <Hero locale={effectiveLocale} />
 
-      {/* 主要特性展示 */}
+      {/* Feature Showcase */}
       <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
@@ -96,14 +126,14 @@ export default function Home({
         </div>
       </section>
 
-      {/* 最新动态 */}
+      {/* Latest Updates */}
       <section class="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
             {getContent(["news", "title"], effectiveLocale)}
           </h2>
           <div class="grid md:grid-cols-2 gap-8">
-            {/* 最新博客文章 */}
+            {/* Latest blog post - always show, no condition check */}
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
               <h3 class="text-xl font-semibold mb-4">
                 <span class="text-blue-500">📰</span>{" "}
@@ -120,15 +150,46 @@ export default function Home({
                     </a>
                   </h4>
                   <p class="text-gray-500 dark:text-gray-400 mb-2">
-                    {new Date(latestPost.date).toLocaleDateString(
+                    {new Date(latestPost.date || new Date()).toLocaleDateString(
                       effectiveLocale === "zh-CN" ? "zh-CN" : "en-US",
                       { year: "numeric", month: "short", day: "numeric" }
                     )}
+                    {latestPost.author && <> · {latestPost.author}</>}
+                    {latestPost.readingTime && (
+                      <> · {latestPost.readingTime} min read</>
+                    )}
                   </p>
-                  <p class="text-gray-600 dark:text-gray-300 mb-4">
+                  {latestPost.cover && (
+                    <div class="mb-4">
+                      <img
+                        src={latestPost.cover}
+                        alt={latestPost.title}
+                        class="w-full h-48 object-cover rounded-md"
+                      />
+                    </div>
+                  )}
+                  <div class="text-gray-600 dark:text-gray-300 mb-4 prose dark:prose-dark max-w-none">
                     {latestPost.description ||
-                      latestPost.content.split("\n")[0]}
-                  </p>
+                      (latestPost.content && (
+                        <p>
+                          {latestPost.content
+                            .split("\n")
+                            .slice(0, 3)
+                            .join(" ")
+                            .substring(0, 300)}
+                          {latestPost.content.length > 300 && "..."}
+                        </p>
+                      ))}
+                  </div>
+                  {latestPost.tags && latestPost.tags.length > 0 && (
+                    <div class="flex flex-wrap gap-2 mb-4">
+                      {latestPost.tags.map((tag) => (
+                        <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <a
                     href={`/blog/${latestPost.slug}`}
                     class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
@@ -150,11 +211,15 @@ export default function Home({
                   </a>
                 </>
               ) : (
-                <p class="text-gray-600 dark:text-gray-300">暂无博客文章</p>
+                <p class="text-gray-600 dark:text-gray-300">
+                  {effectiveLocale === "zh-CN"
+                    ? "暂无博客文章"
+                    : "No blog posts yet"}
+                </p>
               )}
             </div>
 
-            {/* 更新日志 */}
+            {/* Changelog */}
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
               <h3 class="text-xl font-semibold mb-4">
                 <span class="text-blue-500">📋</span>{" "}
@@ -176,11 +241,160 @@ export default function Home({
                 ))}
               </div>
             </div>
+
+            {/* If there's a latest project, show project card */}
+            {latestProject && (
+              <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
+                <h3 class="text-xl font-semibold mb-4">
+                  <span class="text-blue-500">🚀</span>{" "}
+                  {effectiveLocale === "zh-CN" ? "最新项目" : "Latest Project"}
+                </h3>
+                <div class="md:flex gap-6">
+                  {latestProject.image && (
+                    <div class="md:w-1/3 mb-4 md:mb-0">
+                      <img
+                        src={latestProject.image}
+                        alt={latestProject.title || latestProject.name}
+                        class="w-full h-48 md:h-full object-cover rounded-md"
+                      />
+                    </div>
+                  )}
+                  <div class={latestProject.image ? "md:w-2/3" : "w-full"}>
+                    <h4 class="text-lg font-medium mb-2">
+                      <a
+                        href={`/projects/${
+                          latestProject.slug || latestProject.id
+                        }`}
+                        class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                      >
+                        {latestProject.title || latestProject.name}
+                      </a>
+                    </h4>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                      {latestProject.description}
+                    </p>
+
+                    {latestProject.technologies &&
+                      latestProject.technologies.length > 0 && (
+                        <div class="mb-4">
+                          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                            {effectiveLocale === "zh-CN"
+                              ? "技术栈："
+                              : "Technologies:"}
+                          </p>
+                          <div class="flex flex-wrap gap-2">
+                            {latestProject.technologies.map((tech: string) => (
+                              <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                    {latestProject.features &&
+                      latestProject.features.length > 0 && (
+                        <div class="mb-4">
+                          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                            {effectiveLocale === "zh-CN"
+                              ? "主要功能："
+                              : "Key Features:"}
+                          </p>
+                          <ul class="text-gray-600 dark:text-gray-300 text-sm list-disc pl-5 space-y-1">
+                            {latestProject.features
+                              .slice(0, 3)
+                              .map((feature: string) => (
+                                <li>{feature}</li>
+                              ))}
+                            {latestProject.features.length > 3 && (
+                              <li class="text-gray-500 dark:text-gray-400">
+                                {effectiveLocale === "zh-CN"
+                                  ? `...还有 ${
+                                      latestProject.features.length - 3
+                                    } 项功能`
+                                  : `...and ${
+                                      latestProject.features.length - 3
+                                    } more features`}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+
+                    <div class="flex gap-4">
+                      <a
+                        href={`/projects/${
+                          latestProject.slug || latestProject.id
+                        }`}
+                        class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
+                      >
+                        {effectiveLocale === "zh-CN"
+                          ? "查看详情"
+                          : "View Details"}
+                        <svg
+                          class="w-4 h-4 ml-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </a>
+                      {latestProject.demoUrl && (
+                        <a
+                          href={latestProject.demoUrl}
+                          target="_blank"
+                          class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 inline-flex items-center"
+                        >
+                          {effectiveLocale === "zh-CN"
+                            ? "在线演示"
+                            : "Live Demo"}
+                          <svg
+                            class="w-4 h-4 ml-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                      )}
+                      {latestProject.githubUrl && (
+                        <a
+                          href={latestProject.githubUrl}
+                          target="_blank"
+                          class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 inline-flex items-center"
+                        >
+                          {effectiveLocale === "zh-CN" ? "GitHub" : "GitHub"}
+                          <svg
+                            class="w-4 h-4 ml-1"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* 快速开始 */}
+      {/* Quick Start */}
       <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-8 animate-fade-in">

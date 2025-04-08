@@ -1,4 +1,4 @@
-import { t, currentLocale, type Locale } from "../utils/i18n.ts";
+import { t, currentLocale, type Locale } from "../plugins/i18n/mod.ts";
 
 export default function Hero({ locale }: { locale?: Locale }) {
   // 使用传入的locale或当前locale

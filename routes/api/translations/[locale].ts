@@ -1,0 +1,57 @@
+import { Handlers } from "$fresh/server.ts";
+
+export const handler: Handlers = {
+  async GET(req, ctx) {
+    try {
+      // 获取请求的语言
+      const locale = ctx.params.locale;
+      console.log(`[API] 收到翻译请求, 语言: ${locale}`);
+
+      // 验证语言参数
+      if (!locale || !["en-US", "zh-CN"].includes(locale)) {
+        return new Response(JSON.stringify({ error: "不支持的语言" }), {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+
+      // 从文件系统读取翻译文件
+      const filePath = `./docs/translations/${locale}.json`;
+
+      try {
+        const fileContent = await Deno.readTextFile(filePath);
+        console.log(`[API] 成功读取翻译文件: ${filePath}`);
+
+        // 尝试解析JSON以确保它是有效的
+        const translations = JSON.parse(fileContent);
+
+        // 返回翻译数据
+        return new Response(JSON.stringify(translations), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
+        });
+      } catch (fileError) {
+        console.error(`[API] 无法读取或解析翻译文件: ${filePath}`, fileError);
+        return new Response(JSON.stringify({ error: "翻译文件不存在或无效" }), {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    } catch (error) {
+      console.error("[API] 处理翻译请求时出错:", error);
+      return new Response(JSON.stringify({ error: "服务器内部错误" }), {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+  },
+};

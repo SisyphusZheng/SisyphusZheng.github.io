@@ -1,126 +1,110 @@
-import { Handlers } from "$fresh/server.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
+import { Head } from "$fresh/runtime.ts";
 import Layout from "../components/Layout.tsx";
-import { t, currentLocale, type Locale } from "../utils/i18n.ts";
+import { ResumePlugin } from "../plugins/resume/mod.ts";
 
-// 可以定义一个简单的简历数据结构，以后可以扩展
-interface ResumeSection {
-  title: string;
-  items: Array<any>;
+interface ResumePageData {
+  resumeHtml: string;
+  resumeStyles: string;
 }
 
-export const handler: Handlers = {
+export const handler: Handlers<ResumePageData> = {
   async GET(req, ctx) {
-    // 从URL获取语言参数
-    const url = new URL(req.url);
-    const langParam = url.searchParams.get("lang");
-    const locale =
-      langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
+    // 初始化简历插件
+    const resumePlugin = new ResumePlugin({
+      dataPath: "./docs/resume.json",
+      template: "default",
+      printable: true,
+      downloadable: true,
+    });
 
-    return ctx.render({ locale });
+    // 加载简历数据
+    await resumePlugin.init();
+
+    // 获取渲染后的简历HTML和样式
+    const resumeHtml = resumePlugin.renderResume();
+    const resumeStyles = resumePlugin.getResumeStyles();
+
+    // 返回渲染数据
+    return ctx.render({
+      resumeHtml,
+      resumeStyles,
+    });
   },
 };
 
-export default function Resume({ data }: { data: { locale?: Locale } }) {
-  // 使用传入的locale或默认locale
-  const effectiveLocale = data.locale || currentLocale.value;
+export default function ResumePage({ data }: PageProps<ResumePageData>) {
+  const { resumeHtml, resumeStyles } = data;
 
-  // 以下内容应该从i18n翻译系统获取
-  // 这部分应该添加到utils/i18n.ts的翻译文件中
   return (
-    <Layout title={t("nav.resume", effectiveLocale)}>
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
-          <div class="p-6">
-            <h1 class="text-4xl font-bold mb-8 dark:text-white">
-              {t("nav.resume", effectiveLocale)}
-            </h1>
+    <Layout title="简历 - FreshPress" description="我的个人简历">
+      <Head>
+        <style dangerouslySetInnerHTML={{ __html: resumeStyles }} />
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        />
+      </Head>
 
-            {/* 基本信息 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4 dark:text-white">
-                {t("resume.basicInfo", effectiveLocale)}
-              </h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-gray-600 dark:text-gray-300">
-                    {t("resume.name", effectiveLocale)}: John Doe
-                  </p>
-                  <p class="text-gray-600 dark:text-gray-300">
-                    {t("resume.education", effectiveLocale)}: Bachelor of
-                    Computer Science
-                  </p>
-                </div>
-                <div>
-                  <p class="text-gray-600 dark:text-gray-300">
-                    {t("resume.email", effectiveLocale)}: example@example.com
-                  </p>
-                  <p class="text-gray-600 dark:text-gray-300">
-                    {t("resume.github", effectiveLocale)}: github.com/example
-                  </p>
-                </div>
-              </div>
-            </section>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-6 flex justify-end">
+          <button
+            onClick="window.print();"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <i className="fas fa-print mr-2"></i> 打印简历
+          </button>
+        </div>
 
-            {/* 技能 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4 dark:text-white">
-                {t("resume.skills", effectiveLocale)}
-              </h2>
-              <div class="flex flex-wrap gap-2">
-                {[
-                  "TypeScript",
-                  "JavaScript",
-                  "HTML",
-                  "CSS",
-                  "React",
-                  "Node.js",
-                ].map((skill) => (
-                  <span class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </section>
-
-            {/* 项目经验 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4 dark:text-white">
-                {t("resume.projects", effectiveLocale)}
-              </h2>
-              <div class="space-y-4">
-                <div class="border-l-4 border-blue-500 pl-4">
-                  <h3 class="text-xl font-semibold dark:text-white">
-                    FreshPress
-                  </h3>
-                  <p class="text-gray-600 dark:text-gray-300">
-                    {t("resume.projectDescription", effectiveLocale)}
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* 工作经验 */}
-            <section class="mb-8">
-              <h2 class="text-2xl font-bold mb-4 dark:text-white">
-                {t("resume.experience", effectiveLocale)}
-              </h2>
-              <div class="space-y-6">
-                <div class="border-l-4 border-purple-500 pl-4">
-                  <h3 class="text-xl font-semibold dark:text-white">
-                    Web Developer
-                  </h3>
-                  <p class="text-gray-600 dark:text-gray-300">XYZ Company</p>
-                  <p class="text-gray-500 dark:text-gray-400">2020 - Present</p>
-                  <ul class="list-disc pl-6 mt-2 text-gray-600 dark:text-gray-300">
-                    <li>{t("resume.responsibility1", effectiveLocale)}</li>
-                    <li>{t("resume.responsibility2", effectiveLocale)}</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-          </div>
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden border dark:border-gray-700">
+          <div
+            className="p-6"
+            dangerouslySetInnerHTML={{ __html: resumeHtml }}
+          />
         </div>
       </div>
+
+      <style>{`
+        @media print {
+          .layout-navbar, .layout-footer, button {
+            display: none;
+          }
+          
+          body, html {
+            background-color: white !important;
+          }
+          
+          .max-w-4xl {
+            max-width: none;
+            padding: 0;
+            margin: 0;
+          }
+          
+          .shadow-md {
+            box-shadow: none;
+          }
+          
+          .rounded-lg {
+            border-radius: 0;
+          }
+          
+          .border {
+            border: none;
+          }
+          
+          .p-6 {
+            padding: 0;
+          }
+        }
+        
+        /* 暗色模式下简历内容文字为白色 */
+        .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+        .dark p, .dark span, .dark div, .dark li, .dark table, 
+        .dark td, .dark th, .dark tr, .dark a, .dark ul, .dark ol,
+        .dark dl, .dark dt, .dark dd {
+          color: white !important;
+        }
+      `}</style>
     </Layout>
   );
 }

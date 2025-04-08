@@ -4,21 +4,112 @@
  * @module freshpress
  */
 
-// Export public API from utility modules
-export * from "./utils/blog.ts";
-export * from "./utils/content.ts";
-export * from "./utils/i18n.ts";
-export * from "./utils/date.ts";
-export * from "./utils/search.ts";
+import { serve } from "https://deno.land/std@0.220.1/http/server.ts";
+import { join } from "https://deno.land/std@0.220.1/path/mod.ts";
+import { PluginManager } from "./core/plugin.ts";
+import { ThemeManager } from "./core/theme.ts";
+import { build } from "./core/build.ts";
+import { ContentManager } from "./core/content.ts";
 
-// Export main configuration
-export { siteConfig } from "./data/config.ts";
+// 核心接口定义
+export interface ContentManager {
+  getContent(type: string, options?: any): Promise<Content[]>;
+  renderContent(content: Content): Promise<string>;
+  validateContent(content: Content): boolean;
+}
 
-// Export version information
-export const VERSION = "0.2.0";
+export interface Theme {
+  name: string;
+  version: string;
+  apply(): void;
+  customize(options: ThemeOptions): void;
+}
+
+export interface Plugin {
+  name: string;
+  version: string;
+  install(): Promise<void>;
+  uninstall(): Promise<void>;
+  activate?(): Promise<void>;
+  deactivate?(): Promise<void>;
+  configure(options: any): Promise<void>;
+}
+
+export interface Builder {
+  build(): Promise<void>;
+  watch(): Promise<void>;
+  optimize(): Promise<void>;
+}
+
+// 导出核心类型
+export interface Content {
+  id: string;
+  title: string;
+  content: string;
+  date?: string;
+  tags?: string[];
+  url?: string;
+}
+
+// 主题选项接口
+export interface ThemeOptions {
+  colors?: Record<string, string>;
+  fonts?: Record<string, string>;
+  spacing?: Record<string, string>;
+  [key: string]: any;
+}
+
+// 配置接口
+export interface FreshPressConfig {
+  site: {
+    title: string;
+    description: string;
+    baseUrl: string;
+    language: string;
+  };
+  theme: {
+    name: string;
+    options: Record<string, unknown>;
+  };
+  plugins: {
+    enabled: string[];
+    options: Record<string, Record<string, unknown>>;
+  };
+  build: {
+    outputDir: string;
+    clean: boolean;
+    minify: boolean;
+  };
+}
+
+// 导出内置插件
+export { BlogPlugin } from "./plugins/blog/mod.ts";
+export { SearchPlugin } from "./plugins/search/mod.ts";
+export { I18nPlugin } from "./plugins/i18n/mod.ts";
+export { ProjectsPlugin } from "./plugins/projects/mod.ts";
+export { ResumePlugin } from "./plugins/resume/mod.ts";
+
+// 导出核心模块
+export * from "./core/plugin.ts";
+export * from "./core/theme.ts";
+export * from "./core/content.ts";
+export * from "./core/build.ts";
+
+// 导出配置
+export { siteConfig } from "./docs/config.ts";
 
 /**
- * FreshPress information
+ * 定义配置的辅助函数
+ */
+export function defineConfig(config: FreshPressConfig): FreshPressConfig {
+  return config;
+}
+
+// 导出版本信息
+export const VERSION = "0.3.0";
+
+/**
+ * FreshPress信息
  */
 export const about = {
   name: "FreshPress",
@@ -28,28 +119,14 @@ export const about = {
   license: "MIT",
 };
 
-/**
- * Start a new FreshPress project
- * @param {string} projectName - Project name
- * @returns {Promise<void>}
- */
-export async function createProject(projectName: string): Promise<void> {
-  console.log(`Creating new FreshPress project: ${projectName}`);
+// 导出插件管理器
+export const pluginManager = new PluginManager();
 
-  // Project scaffolding functionality
-  // In actual implementation, this would clone the template repository and set up initial files
+// 导出主题管理器
+export const themeManager = new ThemeManager();
 
-  console.log(`
-    Project created successfully! 🎉
-    
-    cd ${projectName}
-    deno task start
-  `);
-}
-
-// Default export
+// 默认导出
 export default {
   VERSION,
   about,
-  createProject,
 };

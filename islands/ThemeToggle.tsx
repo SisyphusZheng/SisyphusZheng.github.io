@@ -60,7 +60,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none"
       aria-label={theme === "light" ? "切换到暗色模式" : "切换到亮色模式"}
       title={theme === "light" ? "切换到暗色模式" : "切换到亮色模式"}
     >

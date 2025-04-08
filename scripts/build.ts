@@ -1,236 +1,90 @@
 #!/usr/bin/env -S deno run -A
-/**
- * FreshPress Static Site Generator
- * For building static HTML output containing all pages
- */
-import { walk } from "https://deno.land/std@0.167.0/fs/walk.ts";
-import { ensureDir } from "https://deno.land/std@0.167.0/fs/ensure_dir.ts";
-import {
-  join,
-  dirname,
-  basename,
-  extname,
-} from "https://deno.land/std@0.167.0/path/mod.ts";
-import { serve } from "https://deno.land/std@0.140.0/http/server.ts";
-import { copy } from "https://deno.land/std@0.167.0/fs/copy.ts";
-import { getAllPosts, parseFrontMatter } from "../utils/blog.ts";
-import { siteConfig } from "../data/config.ts";
 
-// Config
-const OUTPUT_DIR = "./dist";
-const SERVER_URL = "http://localhost:8000";
-const ROUTES_DIR = "./routes";
-const STATIC_DIR = "./static";
-const LOCALES = ["zh-CN", "en-US"];
+import { build } from "$fresh/server.ts";
+import { join, dirname } from "$std/path/mod.ts";
+import { ensureDir } from "$std/fs/ensure_dir.ts";
+import { copy } from "$std/fs/copy.ts";
+import config from "../fresh.config.ts";
+import { parseMarkdownFiles } from "../core/content.ts";
+// 导入配置助手
+import { main as generateConfig } from "./config-helper.ts";
 
-async function main() {
-  console.log("🍋 FreshPress Static Site Generator starting...");
+import "$std/dotenv/load.ts";
 
-  // Ensure the output directory exists
-  await ensureDir(OUTPUT_DIR);
+console.log("🍋 FreshPress 静态站点构建开始...");
 
-  // Start Fresh server
-  console.log("🚀 Starting development server...");
-  const freshProcess = Deno.run({
-    cmd: ["deno", "task", "start"],
-    stdout: "piped",
-    stderr: "piped",
-  });
+// 生成客户端配置文件
+console.log("⚙️ 生成客户端配置文件...");
+try {
+  await generateConfig();
+  console.log("✅ 客户端配置文件生成成功");
+} catch (error) {
+  console.error("❌ 生成客户端配置文件失败:", error);
+}
 
-  // Wait for server to start
-  await waitForServerReady(PORT);
+// 得到项目根目录的绝对路径
+const ROOT_DIR = new URL("..", import.meta.url).pathname;
 
-  try {
-    // Copy static files
-    console.log("📂 Copying static resources...");
-    await copy(STATIC_DIR, join(OUTPUT_DIR, "static"), { overwrite: true });
+// 构建输出目录
+const OUTPUT_DIR = "_site";
 
-    // Generate search index
-    console.log("🔍 Generating search index...");
-    const searchIndexProcess = Deno.run({
-      cmd: ["deno", "run", "-A", "scripts/generate-search-index.ts"],
-      stdout: "piped",
-      stderr: "piped",
-    });
+// 检查是否存在 docs 目录
+try {
+  const docsPath = join(ROOT_DIR, "docs");
+  const stats = await Deno.stat(docsPath);
+  if (stats.isDirectory) {
+    console.log("📚 找到文档目录: docs/");
 
-    const searchIndexStatus = await searchIndexProcess.status();
-    if (!searchIndexStatus.success) {
-      console.error("❌ Generating search index failed");
-      const stderr = new TextDecoder().decode(
-        await searchIndexProcess.stderrOutput()
-      );
-      console.error(stderr);
-    } else {
-      console.log("✅ Search index generated successfully");
-    }
-    searchIndexProcess.close();
-
-    // Get all routes
-    console.log("🗺️ Analyzing routes...");
-    const routeFiles = [];
-    for await (const entry of walk(ROUTES_DIR)) {
-      if (
-        entry.isFile &&
-        entry.name.endsWith(".tsx") &&
-        !entry.name.startsWith("_")
-      ) {
-        routeFiles.push(entry.path);
-      }
-    }
-
-    // Generate page list
-    const pagesToRender = [];
-
-    // Add home and basic pages
-    pagesToRender.push("/");
-    pagesToRender.push("/blog");
-    pagesToRender.push("/projects");
-
-    // Get all blog posts
-    const blogPosts = await getAllPosts();
-
-    // Add page for each blog post
-    for (const post of blogPosts) {
-      pagesToRender.push(`/blog/${post.slug}`);
-    }
-
-    // Project pages
-    for (const project of siteConfig.projects.items) {
-      const slug = project.title
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]/g, "");
-      pagesToRender.push(`/projects/${slug}`);
-    }
-
-    // Multilingual support
-    const allPages = [];
-    for (const page of pagesToRender) {
-      for (const locale of LOCALES) {
-        allPages.push({
-          url: page,
-          locale,
-        });
-      }
-    }
-
-    // Create a progress bar
-    let completed = 0;
-    const total = allPages.length;
-
-    // Render all pages
-    console.log(`🔨 Starting to generate ${total} pages...`);
-
-    for (const { url, locale } of allPages) {
-      const outputPath =
-        url === "/"
-          ? join(OUTPUT_DIR, locale, "index.html")
-          : join(OUTPUT_DIR, locale, url, "index.html");
-
-      // Ensure directory exists
-      await ensureDir(dirname(outputPath));
-
-      try {
-        // Build full URL (with language parameter)
-        const fullUrl = `${SERVER_URL}${url}?locale=${locale}`;
-
-        // Get page HTML
-        const response = await fetch(fullUrl);
-        if (!response.ok) {
-          console.error(
-            `❌ Unable to get page ${url} (${locale}): ${response.status} ${response.statusText}`
-          );
-          continue;
-        }
-
-        // Get HTML content
-        const html = await response.text();
-
-        // Save HTML file
-        await Deno.writeTextFile(outputPath, html);
-
-        // Update progress
-        completed++;
-        const percent = Math.floor((completed / total) * 100);
-        const progressBar =
-          "█".repeat(Math.floor(percent / 2)) +
-          "░".repeat(50 - Math.floor(percent / 2));
-        console.log(
-          `[${progressBar}] ${percent}% (${completed}/${total}) - Generating ${locale}${url}`
-        );
-      } catch (error) {
-        console.error(`❌ Rendering ${url} (${locale}) failed:`, error);
-      }
-    }
-
-    // Create redirect file for each language
-    for (const locale of LOCALES) {
-      const redirectHtml = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta http-equiv="refresh" content="0;url=/${locale}/">
-            <link rel="canonical" href="/${locale}/">
-            <title>Redirecting to /${locale}/</title>
-          </head>
-          <body>
-            <p>Redirecting to <a href="/${locale}/">/${locale}/</a>...</p>
-          </body>
-        </html>
-      `;
-
-      await Deno.writeTextFile(join(OUTPUT_DIR, "index.html"), redirectHtml);
-    }
-
-    // Generate site map
-    await generateSitemap(allPages);
-
-    console.log("✅ Static site generation completed!");
-  } catch (error) {
-    console.error("❌ Error during generation:", error);
-  } finally {
-    // Close server
-    freshProcess.kill("SIGTERM");
-    freshProcess.close();
+    // 解析 Markdown 文件
+    const docs = await parseMarkdownFiles("docs");
+    console.log(`📄 处理了 ${docs.length} 个文档文件`);
   }
+} catch (_error) {
+  // docs 目录不存在，使用默认配置
+  console.log("⚠️ 未找到 docs/ 目录，将使用默认配置");
 }
 
-// Generate site map
-async function generateSitemap(pages) {
-  console.log("🗺️ Generating site map...");
+// 检查配置文件
+try {
+  const configPath = join(ROOT_DIR, "freshpress.config.ts");
+  await Deno.stat(configPath);
+  console.log("⚙️ 找到配置文件: freshpress.config.ts");
+} catch (_error) {
+  console.log("⚠️ 未找到 freshpress.config.ts 文件，将使用默认配置");
+}
 
-  const siteUrl = siteConfig.site.url || "https://example.com";
+// 确保输出目录存在
+await ensureDir(OUTPUT_DIR);
 
-  let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+// 构建静态站点
+const buildResult = await build({
+  importMapURL: new URL("../import_map.json", import.meta.url).href,
+  outDir: OUTPUT_DIR,
+  config,
+});
 
-  // Add all pages to site map
-  for (const { url, locale } of pages) {
-    const fullUrl = `${siteUrl}/${locale}${url === "/" ? "" : url}`;
+console.log(
+  `🏗️ 构建完成，生成了 ${
+    Object.keys(buildResult.export?.entries || {}).length
+  } 个页面`
+);
 
-    sitemap += "  <url>\n";
-    sitemap += `    <loc>${fullUrl}</loc>\n`;
-    sitemap += "    <lastmod>" + new Date().toISOString() + "</lastmod>\n";
+// 复制静态资源
+try {
+  const publicDir = join(ROOT_DIR, "public");
+  const publicDirExists = await Deno.stat(publicDir).then(
+    (stat) => stat.isDirectory,
+    () => false
+  );
 
-    // Higher priority for home page
-    if (url === "/") {
-      sitemap += "    <priority>1.0</priority>\n";
-    } else if (url.startsWith("/blog/")) {
-      sitemap += "    <priority>0.8</priority>\n";
-    } else {
-      sitemap += "    <priority>0.6</priority>\n";
-    }
-
-    sitemap += "  </url>\n";
+  if (publicDirExists) {
+    console.log("📦 复制 public/ 目录中的静态资源...");
+    await copy(publicDir, join(OUTPUT_DIR, "public"), { overwrite: true });
   }
-
-  sitemap += "</urlset>";
-
-  await Deno.writeTextFile(join(OUTPUT_DIR, "sitemap.xml"), sitemap);
+} catch (error) {
+  console.error("复制静态资源时出错:", error);
 }
 
-// Start main function
-if (import.meta.main) {
-  main().catch(console.error);
-}
+console.log(`✅ 静态站点已生成到 ${OUTPUT_DIR}/ 目录`);
+console.log("💡 提示: 使用 'deno task preview' 预览构建结果");
+console.log("🚀 提示: 使用 'deno task deploy' 部署到生产环境");

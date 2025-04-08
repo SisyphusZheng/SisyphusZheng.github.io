@@ -2,6 +2,12 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $_app from "./routes/_app.tsx";
+import * as $_docs_path_ from "./routes/_docs/[...path].tsx";
+import * as $api_plugins_enabled from "./routes/api/plugins/enabled.ts";
+import * as $api_resume_download from "./routes/api/resume/download.ts";
+import * as $api_search from "./routes/api/search.ts";
+import * as $api_translations_locale_ from "./routes/api/translations/[locale].ts";
 import * as $blog_slug_ from "./routes/blog/[slug].tsx";
 import * as $blog_index from "./routes/blog/index.tsx";
 import * as $index from "./routes/index.tsx";
@@ -10,6 +16,7 @@ import * as $projects_slug_ from "./routes/projects/[slug].tsx";
 import * as $projects_index from "./routes/projects/index.tsx";
 import * as $resume from "./routes/resume.tsx";
 import * as $BlogList from "./islands/BlogList.tsx";
+import * as $LocaleSwitcher from "./islands/LocaleSwitcher.tsx";
 import * as $Navbar from "./islands/Navbar.tsx";
 import * as $Search from "./islands/Search.tsx";
 import * as $ThemeToggle from "./islands/ThemeToggle.tsx";
@@ -18,6 +25,12 @@ import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/_app.tsx": $_app,
+    "./routes/_docs/[...path].tsx": $_docs_path_,
+    "./routes/api/plugins/enabled.ts": $api_plugins_enabled,
+    "./routes/api/resume/download.ts": $api_resume_download,
+    "./routes/api/search.ts": $api_search,
+    "./routes/api/translations/[locale].ts": $api_translations_locale_,
     "./routes/blog/[slug].tsx": $blog_slug_,
     "./routes/blog/index.tsx": $blog_index,
     "./routes/index.tsx": $index,
@@ -28,6 +41,7 @@ const manifest = {
   },
   islands: {
     "./islands/BlogList.tsx": $BlogList,
+    "./islands/LocaleSwitcher.tsx": $LocaleSwitcher,
     "./islands/Navbar.tsx": $Navbar,
     "./islands/Search.tsx": $Search,
     "./islands/ThemeToggle.tsx": $ThemeToggle,

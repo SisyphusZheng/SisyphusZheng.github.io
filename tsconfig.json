@@ -1,13 +1,26 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "allowJs": true,
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"],
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "strict": true,
-    "esModuleInterop": true,
+    "strict": false,
+    "noImplicitAny": false,
     "skipLibCheck": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"]
-  }
+    "allowImportingTsExtensions": true,
+    "types": ["preact", "preact/hooks", "preact/jsx-runtime"],
+    "paths": {
+      "$fresh/*": ["./node_modules/@types/fresh/*"],
+      "preact": ["./node_modules/preact"],
+      "preact/*": ["./node_modules/preact/*"],
+      "@preact/signals": ["./node_modules/@preact/signals"],
+      "@preact/signals-core": ["./node_modules/@preact/signals-core"],
+      "twind": ["./node_modules/twind"],
+      "twind/*": ["./node_modules/twind/*"],
+      "marked": ["./node_modules/marked"],
+      "highlight.js": ["./node_modules/highlight.js"],
+      "marked-highlight": ["./node_modules/marked-highlight"]
+    }
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"]
 }

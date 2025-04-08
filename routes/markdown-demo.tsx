@@ -1,6 +1,14 @@
+import { h } from "preact";
 import Layout from "../components/Layout.tsx";
 import Markdown from "../components/Markdown.tsx";
-import { t } from "../utils/i18n.ts";
+import { I18nPlugin } from "../plugins/i18n/mod.ts";
+
+// 创建i18n插件实例
+const i18nPlugin = new I18nPlugin();
+
+// 翻译辅助函数
+const t = (key: string, locale: string, params = {}) =>
+  i18nPlugin.translate(key, params, locale);
 
 const DEMO_MARKDOWN = `
 # FreshPress Markdown演示
@@ -40,7 +48,14 @@ const DEMO_MARKDOWN = `
 
 \`\`\`typescript
 // TypeScript 代码示例
-import { t } from "../utils/i18n.ts";
+import { I18nPlugin } from "../plugins/i18n/mod.ts";
+
+// 创建i18n插件实例
+const i18nPlugin = new I18nPlugin();
+
+// 翻译辅助函数
+const t = (key: string, locale: string, params = {}) => 
+  i18nPlugin.translate(key, params, locale);
 
 export function greeting(name: string): string {
   return \`Hello, \${name}!\`;
@@ -123,14 +138,16 @@ graph TD;
 `;
 
 export default function MarkdownDemo() {
+  // 获取当前语言设置
+  const locale = i18nPlugin.getLocale();
+
   return (
-    <Layout title="Markdown 演示">
+    <Layout title={t("markdown.demo.title", locale)}>
       <div class="max-w-4xl mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-6">Markdown 渲染演示</h1>
-        <p class="mb-8">
-          这个页面展示了 FreshPress 的 Markdown
-          渲染功能，包括目录生成和代码高亮等特性。
-        </p>
+        <h1 class="text-3xl font-bold mb-6">
+          {t("markdown.demo.heading", locale)}
+        </h1>
+        <p class="mb-8">{t("markdown.demo.description", locale)}</p>
 
         <Markdown
           content={DEMO_MARKDOWN}

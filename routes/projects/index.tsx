@@ -1,18 +1,18 @@
-import { Handlers } from "$fresh/server.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
 import Layout from "../../components/Layout.tsx";
-import { siteConfig } from "../../data/config.ts";
-import { getAllProjects, Project } from "../../utils/projects.ts";
-import { t, currentLocale, type Locale } from "../../utils/i18n.ts";
+import { type Project, getProjects } from "../../plugins/projects/mod.ts";
+import { t, currentLocale, type Locale } from "../../plugins/i18n/mod.ts";
 
-export const handler: Handlers<Project[]> = {
-  async GET(req, ctx) {
+export const handler: Handlers = {
+  async GET(req: Request, ctx) {
     // 从URL获取语言参数
     const url = new URL(req.url);
     const langParam = url.searchParams.get("lang");
     const locale =
       langParam === "zh-CN" || langParam === "en-US" ? langParam : undefined;
 
-    const projects = getAllProjects();
+    // 获取项目列表
+    const projects = await getProjects();
     return ctx.render(projects);
   },
 };
@@ -36,9 +36,7 @@ export default function Projects({ data }: { data: Project[] }) {
             <article class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
               <h2 class="text-2xl font-bold mb-2">
                 <a
-                  href={`/projects/${project.title
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
+                  href={`/projects/${project.slug}`}
                   class="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   {project.title}

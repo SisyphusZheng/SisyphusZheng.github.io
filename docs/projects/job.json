@@ -1,0 +1,20 @@
+{
+  "id": "job",
+  "slug": "job",
+  "title": "job",
+  "description": "一个基于 Deno 和 Fresh 框架的现代化静态站点生成器",
+  "image": "/images/projects/freshpress.png",
+  "githubUrl": "https://github.com/freshpress/freshpress",
+  "demoUrl": "https://freshpress.deno.dev",
+  "technologies": ["Deno", "Fresh", "Preact", "TypeScript", "TailwindCSS"],
+  "features": [
+    "基于 Fresh 框架",
+    "插件系统",
+    "主题系统",
+    "国际化支持",
+    "Markdown 支持",
+    "项目展示",
+    "博客系统"
+  ],
+  "longDescription": "# FreshPress\n\nFreshPress 是一个基于 Deno 和 Fresh 框架的现代化静态站点生成器。它提供了丰富的功能，包括插件系统、主题系统、国际化支持等。\n\n## 特性\n\n- 基于 Fresh 框架\n- 插件系统\n- 主题系统\n- 国际化支持\n- Markdown 支持\n- 项目展示\n- 博客系统\n\n## 技术栈\n\n- Deno\n- Fresh\n- Preact\n- TypeScript\n- TailwindCSS\n\n## 快速开始\n\n```bash\n# 安装 FreshPress\nfresh install freshpress\n\n# 创建新项目\nfreshpress create my-site\n\n# 启动开发服务器\ncd my-site\nfreshpress dev\n```\n\n## 文档\n\n更多信息请访问 [FreshPress 文档](https://freshpress.deno.dev/docs)。"
+}
