@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "A description of your project",
   "main": "./mod.ts",
+  "exports": "./mod.ts",
   "tasks": {
     "start": "deno run -A scripts/generate-search-index-dev.ts && deno run -A --unstable-sloppy-imports --watch=static/,routes/ dev.ts",
     "preview": "deno run -A main.ts",
