@@ -2,6 +2,8 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $_locale_path_ from "./routes/[locale]/[...path].tsx";
+import * as $_locale_index from "./routes/[locale]/index.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $_docs_path_ from "./routes/_docs/[...path].tsx";
 import * as $api_plugins_enabled from "./routes/api/plugins/enabled.ts";
@@ -25,6 +27,8 @@ import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
+    "./routes/[locale]/[...path].tsx": $_locale_path_,
+    "./routes/[locale]/index.tsx": $_locale_index,
     "./routes/_app.tsx": $_app,
     "./routes/_docs/[...path].tsx": $_docs_path_,
     "./routes/api/plugins/enabled.ts": $api_plugins_enabled,

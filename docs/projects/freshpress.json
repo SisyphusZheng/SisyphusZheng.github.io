@@ -1,9 +1,9 @@
 {
   "id": "freshpress",
   "slug": "freshpress",
-  "title": "FreshPress 静态网站生成器",
-  "description": "基于 Deno 和 Fresh 框架构建的现代化静态网站生成器，专注于性能和开发体验。",
-  "image": "/images/projects/freshpress.jpg",
+  "title": "FreshPress",
+  "description": "一个基于 Deno 和 Fresh 框架的现代化静态站点生成器",
+  "image": "https://freshpress.deno.dev",
   "githubUrl": "https://github.com/freshpress/freshpress",
   "demoUrl": "https://freshpress.deno.dev",
   "technologies": ["Deno", "TypeScript", "Fresh", "Preact", "Tailwind CSS"],

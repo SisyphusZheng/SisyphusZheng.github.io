@@ -4,7 +4,7 @@ slug: i18n-guide
 date: 2024-04-16
 author: FreshPress 团队
 excerpt: 学习如何使用 FreshPress 的国际化功能创建多语言静态网站，包含完整的配置和使用教程。
-cover: /images/blog/i18n-guide.jpg
+cover: /static/favicon.svg
 tags:
   - 教程
   - 国际化

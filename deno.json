@@ -10,9 +10,9 @@
     "load-config": "deno run -A --unstable-sloppy-imports scripts/load-config.ts",
     "preload": "deno run -A --unstable-sloppy-imports scripts/preload.ts",
     "dev": "deno task preload && deno run -A --unstable-sloppy-imports --watch=static/,routes/,plugins/,themes/ scripts/dev.ts",
-    "build": "deno task preload && deno run -A --unstable-sloppy-imports scripts/build.ts",
+    "build": "deno task preload && deno run -A --unstable-sloppy-imports --import-map=import_map.json https://deno.land/x/fresh@1.7.3/dev.ts build --static --no-css-processing",
     "preview": "deno task load-config && deno run -A --unstable-sloppy-imports scripts/preview.ts",
-    "start": "deno task load-config && deno task init && deno task search:index && deno run -A --unstable-sloppy-imports main.ts",
+    "start": "deno task dev",
     "search:index": "deno run -A --unstable-sloppy-imports scripts/build-search-index.ts",
     "plugin:list": "deno run -A --unstable-sloppy-imports mod.ts plugin list",
     "plugin:add": "deno run -A --unstable-sloppy-imports mod.ts plugin add",
@@ -38,8 +38,17 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"],
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns", "esnext"],
+    "module": "esnext",
+    "target": "esnext",
     "allowImportingTsExtensions": true,
-    "types": ["./deno.d.ts"]
+    "types": ["./deno.d.ts"],
+    "moduleResolution": "node",
+    "allowJs": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false
   }
 }

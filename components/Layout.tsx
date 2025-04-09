@@ -60,6 +60,7 @@ export default function Layout({
           }}
         />
         <script src="/fp-config.js"></script>
+        <script src="/i18n-init.js"></script>
       </Head>
       <div class="min-h-screen flex flex-col">
         <Navbar />

@@ -1,15 +1,17 @@
 #!/usr/bin/env -S deno run -A
 
-import { build } from "$fresh/server.ts";
-import { join, dirname } from "$std/path/mod.ts";
 import { ensureDir } from "$std/fs/ensure_dir.ts";
+import { join } from "$std/path/mod.ts";
 import { copy } from "$std/fs/copy.ts";
+import "$std/dotenv/load.ts";
 import config from "../fresh.config.ts";
 import { parseMarkdownFiles } from "../core/content.ts";
 // 导入配置助手
 import { main as generateConfig } from "./config-helper.ts";
 
-import "$std/dotenv/load.ts";
+// 使用兼容的方式导入Fresh构建工具
+import { FreshConfig } from "$fresh/server.ts";
+import { Command } from "$fresh/src/command/mod.ts";
 
 console.log("🍋 FreshPress 静态站点构建开始...");
 
@@ -56,18 +58,42 @@ try {
 // 确保输出目录存在
 await ensureDir(OUTPUT_DIR);
 
-// 构建静态站点
-const buildResult = await build({
-  importMapURL: new URL("../import_map.json", import.meta.url).href,
-  outDir: OUTPUT_DIR,
-  config,
-});
+console.log("🏗️ 开始构建静态站点...");
 
-console.log(
-  `🏗️ 构建完成，生成了 ${
-    Object.keys(buildResult.export?.entries || {}).length
-  } 个页面`
-);
+// 使用新的构建方法
+try {
+  // 使用Fresh命令行工具构建项目
+  const command = new Command<FreshConfig>("build", "Build the project");
+
+  // 直接执行build命令
+  const process = new Deno.Command(Deno.execPath(), {
+    args: [
+      "run",
+      "-A",
+      "--unstable-sloppy-imports",
+      "--import-map=import_map.json",
+      "https://deno.land/x/fresh@1.7.3/dev.ts",
+      "build",
+      "--output-dir",
+      OUTPUT_DIR,
+      "--static",
+    ],
+    cwd: ROOT_DIR,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
+  const { code } = await process.output();
+
+  if (code === 0) {
+    console.log(`🏗️ 构建完成，静态文件已生成到 ${OUTPUT_DIR}/ 目录`);
+  } else {
+    throw new Error(`构建失败，退出码: ${code}`);
+  }
+} catch (error) {
+  console.error("❌ 构建失败:", error);
+  Deno.exit(1);
+}
 
 // 复制静态资源
 try {

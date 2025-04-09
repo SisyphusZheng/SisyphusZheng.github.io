@@ -1,10 +1,11 @@
 import { Handlers } from "$fresh/server.ts";
+import { join } from "https://deno.land/std/path/mod.ts";
 
 export const handler: Handlers = {
-  async GET(req, ctx) {
+  async GET(_req, ctx) {
     try {
       // 获取请求的语言
-      const locale = ctx.params.locale;
+      const locale = ctx.params.locale as string;
       console.log(`[API] 收到翻译请求, 语言: ${locale}`);
 
       // 验证语言参数
@@ -17,8 +18,14 @@ export const handler: Handlers = {
         });
       }
 
-      // 从文件系统读取翻译文件
-      const filePath = `./docs/translations/${locale}.json`;
+      // 使用绝对路径从文件系统读取翻译文件
+      const filePath = join(
+        Deno.cwd(),
+        "docs",
+        "translations",
+        `${locale}.json`
+      );
+      console.log(`[API] 尝试读取翻译文件: ${filePath}`);
 
       try {
         const fileContent = await Deno.readTextFile(filePath);
@@ -27,12 +34,15 @@ export const handler: Handlers = {
         // 尝试解析JSON以确保它是有效的
         const translations = JSON.parse(fileContent);
 
-        // 返回翻译数据
+        // 返回翻译数据，添加CORS头
         return new Response(JSON.stringify(translations), {
           status: 200,
           headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "Content-Type",
           },
         });
       } catch (fileError) {

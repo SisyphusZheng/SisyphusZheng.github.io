@@ -2,6 +2,46 @@
 /// <reference types="https://esm.sh/preact@10.19.6" />
 /// <reference types="https://esm.sh/preact@10.19.6/jsx-runtime" />
 
+// 全局标准类型定义
+interface Record<K extends keyof any, T> {
+  [P in K]: T;
+}
+
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+};
+
+interface Promise<T> {
+  then<TResult1 = T, TResult2 = never>(
+    onfulfilled?:
+      | ((value: T) => TResult1 | Promise<TResult1>)
+      | undefined
+      | null,
+    onrejected?:
+      | ((reason: any) => TResult2 | Promise<TResult2>)
+      | undefined
+      | null
+  ): Promise<TResult1 | TResult2>;
+  catch<TResult = never>(
+    onrejected?:
+      | ((reason: any) => TResult | Promise<TResult>)
+      | undefined
+      | null
+  ): Promise<T | TResult>;
+  finally(onfinally?: (() => void) | undefined | null): Promise<T>;
+}
+
+interface JSON {
+  parse(text: string, reviver?: (key: any, value: any) => any): any;
+  stringify(
+    value: any,
+    replacer?: (key: string, value: any) => any | (string | number)[] | null,
+    space?: string | number
+  ): string;
+}
+
+declare var JSON: JSON;
+
 declare module "preact" {
   export interface ComponentChildren {}
   export function h(type: any, props: any, ...children: any[]): any;
@@ -23,8 +63,44 @@ declare module "$fresh/server" {
   }
 }
 
-// Deno API 类型声明
+// 应用和插件类型定义
+declare interface App {
+  use(plugin: Plugin): void;
+}
 
+declare interface Plugin {
+  install(app: App): void;
+  activate(): Promise<void>;
+  deactivate(): void;
+  configure(config: any): void;
+  severity?: string;
+}
+
+// i18n插件类型定义
+declare interface I18nConfig {
+  locales: string[];
+  defaultLocale: string;
+  fallbackLocale: string;
+  debug?: boolean;
+  apiEndpoint?: string;
+  translationsDir?: string;
+}
+
+declare interface TranslationEntry {
+  [key: string]: string | TranslationEntry;
+}
+
+declare interface I18nPlugin extends Plugin {
+  setLocale(locale: string): void;
+  getLocale(): string;
+  getLocales(): string[];
+  getTranslations(): Record<string, TranslationEntry>;
+  translate(key: string, params?: Record<string, any>, locale?: string): string;
+  waitForTranslations(): Promise<void>;
+  initialized: boolean;
+}
+
+// Deno API 类型声明
 declare namespace Deno {
   export interface CreateOptions {
     recursive?: boolean;
@@ -80,6 +156,7 @@ declare namespace Deno {
     path: string,
     options?: { recursive?: boolean }
   ): Promise<void>;
+  export function cwd(): string;
 }
 
 // 添加@preact/signals类型声明
@@ -94,4 +171,24 @@ declare module "@preact/signals" {
   export function computed<T>(fn: () => T): Signal<T>;
   export function effect(fn: () => void | (() => void)): () => void;
   export function batch<T>(fn: () => T): T;
+}
+
+// 添加博客相关类型
+declare interface BlogPost {
+  id: string;
+  title: string;
+  content?: string;
+  description?: string;
+  cover?: string;
+  date?: string | Date;
+  author?: string;
+  tags?: string[];
+  readingTime?: number;
+}
+
+// 添加区域和内容类型
+declare type Locale = string;
+
+interface LayoutProps {
+  children: preact.ComponentChildren;
 }

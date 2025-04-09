@@ -151,8 +151,18 @@ export class ResumePlugin implements Plugin {
       return `<div class="error">简历数据未加载</div>`;
     }
 
-    const { basics, work, education, skills, languages, projects } =
-      this.resumeData;
+    // 从resume字段中获取数据
+    const resumeData = this.resumeData.resume || this.resumeData;
+    const { basics, work, education, skills, languages, projects } = resumeData;
+
+    // 获取UI文本（如果存在）
+    const sections = this.resumeData.sections || {
+      workExperience: "工作经历",
+      education: "教育背景",
+      skills: "技能",
+      languages: "语言",
+      projects: "项目经验",
+    };
 
     return `
       <div class="resume">
@@ -208,7 +218,7 @@ export class ResumePlugin implements Plugin {
           work && work.length > 0
             ? `
         <div class="resume-section">
-          <h2 class="resume-section-title">工作经历</h2>
+          <h2 class="resume-section-title">${sections.workExperience}</h2>
           ${work
             .map(
               (job: any) => `
@@ -249,16 +259,16 @@ export class ResumePlugin implements Plugin {
           education && education.length > 0
             ? `
         <div class="resume-section">
-          <h2 class="resume-section-title">教育经历</h2>
+          <h2 class="resume-section-title">${sections.education}</h2>
           ${education
             .map(
               (edu: any) => `
             <div class="resume-item">
               <div class="resume-item-header">
-                <div class="resume-item-title">${edu.institution}</div>
-                <div class="resume-item-subtitle">${edu.studyType} - ${
+                <div class="resume-item-title">${edu.studyType} ${
                 edu.area
               }</div>
+                <div class="resume-item-subtitle">${edu.institution}</div>
                 <div class="resume-item-date">${edu.startDate} - ${
                 edu.endDate
               }</div>
@@ -273,7 +283,7 @@ export class ResumePlugin implements Plugin {
                   edu.courses && edu.courses.length > 0
                     ? `
                 <div class="resume-item-courses">
-                  <span class="resume-item-courses-title">主要课程: </span>
+                  <span class="resume-item-courses-title">相关课程：</span>
                   ${edu.courses.join(", ")}
                 </div>
                 `
@@ -293,29 +303,43 @@ export class ResumePlugin implements Plugin {
           skills && skills.length > 0
             ? `
         <div class="resume-section">
-          <h2 class="resume-section-title">专业技能</h2>
+          <h2 class="resume-section-title">${sections.skills}</h2>
           <div class="resume-skills">
             ${skills
               .map(
                 (skill: any) => `
               <div class="resume-skill">
-                <div class="resume-skill-name">${
-                  skill.name
-                } <span class="resume-skill-level">(${skill.level})</span></div>
+                <div class="resume-skill-name">${skill.name}</div>
+                <div class="resume-skill-level">${skill.level}</div>
                 ${
                   skill.keywords && skill.keywords.length > 0
-                    ? `
-                <div class="resume-skill-keywords">
-                  ${skill.keywords
-                    .map(
-                      (keyword: string) =>
-                        `<span class="resume-skill-keyword">${keyword}</span>`
-                    )
-                    .join("")}
-                </div>
-                `
+                    ? `<div class="resume-skill-keywords">${skill.keywords.join(
+                        ", "
+                      )}</div>`
                     : ""
                 }
+              </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
+        
+        ${
+          languages && languages.length > 0
+            ? `
+        <div class="resume-section">
+          <h2 class="resume-section-title">${sections.languages}</h2>
+          <div class="resume-languages">
+            ${languages
+              .map(
+                (lang: any) => `
+              <div class="resume-language">
+                <span class="resume-language-name">${lang.language}</span>
+                <span class="resume-language-fluency">${lang.fluency}</span>
               </div>
             `
               )
@@ -330,22 +354,20 @@ export class ResumePlugin implements Plugin {
           projects && projects.length > 0
             ? `
         <div class="resume-section">
-          <h2 class="resume-section-title">项目经历</h2>
+          <h2 class="resume-section-title">${sections.projects}</h2>
           ${projects
             .map(
               (project: any) => `
             <div class="resume-item">
               <div class="resume-item-header">
-                <div class="resume-item-title">
+                <div class="resume-item-title">${project.name}</div>
+                <div class="resume-item-subtitle">${project.entity || ""} 
                   ${
                     project.url
-                      ? `<a href="${project.url}" target="_blank">${project.name}</a>`
-                      : project.name
+                      ? `<a href="${project.url}" target="_blank">(链接)</a>`
+                      : ""
                   }
                 </div>
-                <div class="resume-item-subtitle">${project.entity} | ${
-                project.type
-              }</div>
                 <div class="resume-item-date">${project.startDate} - ${
                 project.endDate
               }</div>
@@ -365,16 +387,16 @@ export class ResumePlugin implements Plugin {
                 }
                 ${
                   project.keywords && project.keywords.length > 0
-                    ? `
-                <div class="resume-item-technologies">
-                  ${project.keywords
-                    .map(
-                      (tech: string) =>
-                        `<span class="resume-item-technology">${tech}</span>`
-                    )
-                    .join("")}
-                </div>
-                `
+                    ? `<div class="resume-item-keywords">${project.keywords.join(
+                        ", "
+                      )}</div>`
+                    : ""
+                }
+                ${
+                  project.roles && project.roles.length > 0
+                    ? `<div class="resume-item-roles">角色: ${project.roles.join(
+                        ", "
+                      )}</div>`
                     : ""
                 }
               </div>
@@ -382,28 +404,6 @@ export class ResumePlugin implements Plugin {
           `
             )
             .join("")}
-        </div>
-        `
-            : ""
-        }
-        
-        ${
-          languages && languages.length > 0
-            ? `
-        <div class="resume-section">
-          <h2 class="resume-section-title">语言能力</h2>
-          <div class="resume-languages">
-            ${languages
-              .map(
-                (lang: any) => `
-              <div class="resume-language">
-                <span class="resume-language-name">${lang.language}</span>
-                <span class="resume-language-fluency">${lang.fluency}</span>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
         </div>
         `
             : ""

@@ -47,6 +47,7 @@ export class BlogPlugin implements Plugin {
   version = "1.0.0";
   description = "Blog plugin for FreshPress";
   author = "FreshPress Team";
+  initialized = false;
 
   /** 插件配置 */
   config: BlogPluginConfig;
@@ -86,6 +87,7 @@ export class BlogPlugin implements Plugin {
   async activate(): Promise<void> {
     // 加载博客文章
     await this.loadPosts();
+    this.initialized = true;
   }
 
   /**
@@ -94,6 +96,7 @@ export class BlogPlugin implements Plugin {
   async deactivate(): Promise<void> {
     // 清空缓存
     this.posts = [];
+    this.initialized = false;
   }
 
   /**

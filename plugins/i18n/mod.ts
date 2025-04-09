@@ -3,8 +3,9 @@
  * 提供多语言支持
  */
 
-import { Plugin } from "../../core/plugin";
-import { signal } from "@preact/signals";
+import { Plugin } from "../../core/plugin.ts";
+import { App } from "../../core/app.ts";
+import { signal } from "../../utils/signal.ts";
 
 /**
  * 国际化插件配置
@@ -25,6 +26,11 @@ export interface I18nPluginConfig {
   /** 对于不支持的语言回退到指定语言 */
   fallbackLocale: string;
 }
+
+/**
+ * 语言类型
+ */
+export type Locale = string;
 
 /**
  * 翻译条目类型
@@ -49,6 +55,11 @@ export const DEFAULT_CONFIG: I18nPluginConfig = {
   fallbackLocale: "en-US",
 };
 
+// 当前语言的全局信号
+const _currentLocale = signal<string>(DEFAULT_CONFIG.defaultLocale);
+// 重新导出供组件使用
+export const currentLocale = _currentLocale;
+
 /**
  * 国际化插件类
  */
@@ -57,6 +68,7 @@ export class I18nPlugin implements Plugin {
   version = "1.0.0";
   description = "Internationalization plugin for FreshPress";
   author = "FreshPress Team";
+  severity = "info"; // 添加severity属性
 
   /** 插件配置 */
   config: I18nPluginConfig;
@@ -67,6 +79,18 @@ export class I18nPlugin implements Plugin {
   /** 当前语言 */
   private currentLocale: string;
 
+  /** 加载失败的翻译文件 */
+  private failedLoads: Record<string, boolean> = {};
+
+  /** 翻译加载状态 */
+  private isLoading = false;
+
+  /** 翻译加载完成信号 */
+  private loaded = signal(false);
+
+  /** 插件初始化状态 */
+  public initialized = false;
+
   constructor(config: Partial<I18nPluginConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.currentLocale = this.config.defaultLocale;
@@ -75,88 +99,134 @@ export class I18nPlugin implements Plugin {
   /**
    * 安装插件
    */
-  async install(): Promise<void> {
-    // 创建必要的目录
-    try {
-      await Deno.mkdir(this.config.translationsDir, { recursive: true });
-
-      // 创建默认翻译文件
-      for (const locale of this.config.locales) {
-        const filePath = `${this.config.translationsDir}/${locale}.json`;
-        try {
-          await Deno.stat(filePath);
-        } catch (error) {
-          if (error instanceof Deno.errors.NotFound) {
-            await Deno.writeTextFile(
-              filePath,
-              JSON.stringify(
-                {
-                  hello: locale === "en-US" ? "Hello, world!" : "你好，世界！",
-                },
-                null,
-                2
-              )
-            );
-          }
-        }
-      }
-    } catch (error) {
-      // 目录可能已存在
-      if (!(error instanceof Deno.errors.AlreadyExists)) {
-        throw error;
-      }
-    }
-  }
-
-  /**
-   * 卸载插件
-   */
-  async uninstall(): Promise<void> {
-    // 插件卸载逻辑
+  install(app: App): void {
+    console.log(`[I18n] Installing i18n plugin...`);
   }
 
   /**
    * 激活插件
    */
   async activate(): Promise<void> {
-    console.log(`[I18n] Activating i18n plugin...`);
+    if (this.initialized) {
+      console.log("[I18n] 插件已初始化，跳过激活");
+      return;
+    }
 
-    // 预加载所有翻译文件
-    await this.preloadAllTranslations();
+    console.log("[I18n] Activating i18n plugin...");
 
-    // 设置当前语言到全局信号
-    if (typeof window !== "undefined") {
-      // 从localStorage获取用户偏好语言
-      const preferredLocale = localStorage.getItem("preferred_locale");
-      if (preferredLocale && this.config.locales.includes(preferredLocale)) {
-        this.currentLocale = preferredLocale;
-        console.log(`[I18n] 从存储加载偏好语言: ${preferredLocale}`);
+    try {
+      // 预加载所有语言翻译
+      await this.preloadAllTranslations();
+
+      // 客户端环境下，从localStorage读取用户首选语言
+      if (typeof window !== "undefined") {
+        // 从localStorage读取偏好语言
+        const storedLocale = localStorage.getItem("preferred_locale");
+        if (storedLocale && this.config.locales.includes(storedLocale)) {
+          this.setLocale(storedLocale);
+        } else if (this.config.detectBrowserLocale) {
+          // 尝试从浏览器语言中匹配
+          const browserLang = navigator.language;
+          const closestLang = this.findClosestLocale(browserLang);
+          if (closestLang) {
+            this.setLocale(closestLang);
+          }
+        }
+
+        // 安装全局翻译函数
+        this.installGlobalTranslation();
       }
+
+      this.initialized = true;
+      console.log(`[I18n] Plugin activated with locale: ${this.currentLocale}`);
+      console.log(
+        `[I18n] Available locales: ${this.config.locales.join(", ")}`
+      );
+      console.log(
+        `[I18n] Loaded translations: `,
+        Object.keys(this.translations)
+      );
+    } catch (error) {
+      console.error("[I18n] Failed to activate plugin:", error);
     }
+  }
 
-    // 更新全局信号
-    currentLocale.value = this.currentLocale;
+  /**
+   * 在浏览器环境安装全局翻译函数和变量
+   */
+  private installGlobalTranslation(): void {
+    if (typeof window === "undefined") return;
 
-    console.log(`[I18n] Plugin activated with locale: ${this.currentLocale}`);
-    console.log(`[I18n] Available locales: ${this.config.locales.join(", ")}`);
+    // 安装全局翻译函数
+    window.__t = (key, params = {}, locale) => {
+      return this.translate(key, params, locale);
+    };
 
-    // 在客户端环境中，设置文档的lang属性
-    if (typeof document !== "undefined") {
-      document.documentElement.lang = this.currentLocale;
-    }
+    // 设置当前语言
+    window.__currentLocale = this.currentLocale;
+
+    // 将翻译字典添加到全局对象
+    window.__translations = this.translations;
+
+    console.log("[I18n] 全局翻译函数已安装，可以使用window.__t()进行翻译");
   }
 
   /**
    * 预加载所有语言的翻译
    */
   private async preloadAllTranslations(): Promise<void> {
-    // 加载基础翻译
-    await this.loadTranslations();
+    if (this.isLoading) {
+      console.log(`[I18n] 翻译正在加载中，等待完成...`);
+      return;
+    }
 
-    // 验证翻译键的一致性
-    this.validateTranslationKeys();
+    this.isLoading = true;
+    console.log(`[I18n] 开始加载翻译文件...`);
 
-    console.log(`[I18n] 已预加载所有语言翻译`);
+    try {
+      // 加载基础翻译
+      await this.loadTranslations();
+
+      // 验证翻译键的一致性
+      this.validateTranslationKeys();
+
+      console.log(`[I18n] 已预加载所有语言翻译`);
+      this.loaded.value = true;
+    } catch (error) {
+      console.error(`[I18n] 加载翻译文件失败:`, error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * 加载翻译文件
+   */
+  private async loadTranslations(): Promise<void> {
+    const { locales, translationsDir } = this.config;
+
+    for (const locale of locales) {
+      if (this.failedLoads[locale]) {
+        console.warn(`[I18n] 跳过已失败的翻译文件: ${locale}`);
+        continue;
+      }
+
+      try {
+        const filePath = `${translationsDir}/${locale}.json`;
+        const content = await Deno.readTextFile(filePath);
+        this.translations[locale] = JSON.parse(content);
+        console.log(`[I18n] 成功加载翻译文件: ${locale}`);
+      } catch (error) {
+        console.error(`[I18n] 加载翻译文件失败 ${locale}:`, error);
+        this.failedLoads[locale] = true;
+      }
+    }
+
+    // 检查是否所有翻译文件都加载失败
+    const allFailed = locales.every((locale) => this.failedLoads[locale]);
+    if (allFailed) {
+      console.warn(`[I18n] 所有翻译文件加载失败`);
+    }
   }
 
   /**
@@ -187,19 +257,19 @@ export class I18nPlugin implements Plugin {
   }
 
   /**
-   * 递归获取所有翻译键（包括嵌套键）
+   * 递归获取对象中所有键的路径
    */
   private getAllKeys(obj: any, prefix = ""): string[] {
     let keys: string[] = [];
 
     for (const key in obj) {
-      const newKey = prefix ? `${prefix}.${key}` : key;
-
       if (typeof obj[key] === "object" && obj[key] !== null) {
-        // 递归处理嵌套对象
-        keys = [...keys, ...this.getAllKeys(obj[key], newKey)];
+        keys = [
+          ...keys,
+          ...this.getAllKeys(obj[key], prefix ? `${prefix}.${key}` : key),
+        ];
       } else {
-        keys.push(newKey);
+        keys.push(prefix ? `${prefix}.${key}` : key);
       }
     }
 
@@ -207,102 +277,51 @@ export class I18nPlugin implements Plugin {
   }
 
   /**
-   * 检查特定语言的翻译是否已加载
-   */
-  isTranslationLoaded(locale: string): boolean {
-    return (
-      !!this.translations[locale] &&
-      Object.keys(this.translations[locale]).length > 0
-    );
-  }
-
-  /**
-   * 停用插件
-   */
-  async deactivate(): Promise<void> {
-    // 清空缓存
-    this.translations = {};
-  }
-
-  /**
-   * 配置插件
-   */
-  async configure(options: Partial<I18nPluginConfig>): Promise<void> {
-    this.config = { ...this.config, ...options };
-
-    // 重新加载翻译
-    await this.loadTranslations();
-  }
-
-  /**
-   * 加载翻译文件
-   */
-  private async loadTranslations(): Promise<void> {
-    this.translations = {};
-
-    try {
-      console.log(`[I18n] 开始加载翻译文件`);
-
-      // 根据已知的语言列表加载翻译文件
-      for (const locale of this.config.locales) {
-        try {
-          // 使用API端点加载翻译
-          if (typeof window !== "undefined") {
-            // 浏览器环境
-            console.log(`[I18n] 从API加载翻译: ${locale}`);
-            const response = await fetch(`/api/translations/${locale}`);
-            if (response.ok) {
-              this.translations[locale] = await response.json();
-              console.log(`[I18n] 已从API加载语言 ${locale} 的翻译`);
-            } else {
-              console.error(`[I18n] 从API加载翻译失败: ${response.statusText}`);
-            }
-          } else {
-            // 服务器环境直接从文件系统读取
-            console.log(`[I18n] 从文件系统加载翻译: ${locale}`);
-            const filePath = `./docs/translations/${locale}.json`;
-            const content = await Deno.readTextFile(filePath);
-            this.translations[locale] = JSON.parse(content);
-            console.log(`[I18n] 已加载语言 ${locale} 的翻译`);
-          }
-        } catch (error) {
-          console.error(`[I18n] 加载翻译文件 ${locale} 失败:`, error);
-        }
-      }
-
-      // 检查是否所有语言都加载失败
-      if (Object.keys(this.translations).length === 0) {
-        console.error(
-          "[I18n] 警告: 所有翻译文件加载失败！请确保翻译文件存在于正确的位置。"
-        );
-      }
-    } catch (error) {
-      console.error("[I18n] 加载翻译时出错:", error);
-    }
-  }
-
-  /**
    * 设置当前语言
    */
   setLocale(locale: string): void {
-    console.log(
-      `[I18n] 尝试设置语言: ${locale}, 当前语言: ${this.currentLocale}`
-    );
-    if (this.config.locales.includes(locale)) {
-      this.currentLocale = locale;
-      console.log(`[I18n] 语言设置成功: ${locale}`);
-    } else if (this.config.fallback) {
-      console.log(
-        `[I18n] 语言 ${locale} 不受支持，回退到 ${this.config.fallbackLocale}`
+    if (!this.config.locales.includes(locale)) {
+      console.warn(
+        `[I18n] 不支持的语言: ${locale}，使用默认语言: ${this.config.defaultLocale}`
       );
-      this.currentLocale = this.config.fallbackLocale;
-    } else {
-      console.warn(`[I18n] 语言 ${locale} 不受支持且没有启用回退`);
+      locale = this.config.defaultLocale;
     }
+
+    this.currentLocale = locale;
+    _currentLocale.value = locale;
+
+    // 更新localStorage
+    if (typeof window !== "undefined") {
+      localStorage.setItem("preferred_locale", locale);
+      document.documentElement.lang = locale;
+    }
+
+    console.log(`[I18n] 当前语言已设置为: ${locale}`);
   }
 
   /**
-   * 翻译文本
+   * 获取当前语言
+   */
+  getLocale(): string {
+    return this.currentLocale;
+  }
+
+  /**
+   * 获取支持的语言列表
+   */
+  getLocales(): string[] {
+    return this.config.locales;
+  }
+
+  /**
+   * 获取已加载的所有翻译
+   */
+  getTranslations(): Record<string, TranslationDictionary> {
+    return this.translations;
+  }
+
+  /**
+   * 翻译指定的键
    */
   translate(
     key: string,
@@ -310,108 +329,284 @@ export class I18nPlugin implements Plugin {
     locale?: string
   ): string {
     const targetLocale = locale || this.currentLocale;
-    const dictionary = this.translations[targetLocale] || {};
+    const dictionary = this.translations[targetLocale];
 
-    // 使用点号访问嵌套属性
-    const keyPath = key.split(".");
-    let value: any = dictionary;
+    // 详细调试信息
+    console.log(
+      `[I18n] 翻译请求: key=${key}, locale=${targetLocale}, 可用字典:`,
+      dictionary ? Object.keys(dictionary).join(", ") : "无"
+    );
 
-    for (const segment of keyPath) {
-      value = value?.[segment];
-      if (value === undefined) break;
+    if (!dictionary) {
+      console.warn(`[I18n] 找不到语言的翻译字典: ${targetLocale}`);
+
+      // 尝试回退到其他语言
+      if (this.config.fallback && targetLocale !== this.config.fallbackLocale) {
+        console.log(`[I18n] 尝试回退到${this.config.fallbackLocale}语言`);
+        return this.translate(key, params, this.config.fallbackLocale);
+      }
+
+      return key;
     }
 
-    // 如果没有找到翻译，尝试回退
-    if (
-      value === undefined &&
-      this.config.fallback &&
-      targetLocale !== this.config.fallbackLocale
-    ) {
-      return this.translate(key, params, this.config.fallbackLocale);
-    }
+    // 获取嵌套的翻译值
+    const value = this.getNestedValue(dictionary, key);
+    console.log(`[I18n] 翻译键 ${key} 的值: `, value);
 
-    // 如果还是没有找到翻译，返回键名
-    if (typeof value !== "string") {
+    if (value === undefined) {
+      console.warn(`[I18n] 找不到翻译键: ${key} (语言: ${targetLocale})`);
+
+      // 尝试回退到其他语言
+      if (this.config.fallback && targetLocale !== this.config.fallbackLocale) {
+        console.log(`[I18n] 尝试回退到${this.config.fallbackLocale}语言`);
+        return this.translate(key, params, this.config.fallbackLocale);
+      }
+
       return key;
     }
 
     // 替换参数
-    return value.replace(/{{\s*([a-zA-Z0-9_]+)\s*}}/g, (_, name) => {
-      return params[name] !== undefined ? params[name] : `{{${name}}}`;
+    const finalValue =
+      typeof value === "string" && Object.keys(params).length > 0
+        ? this.replaceParams(value, params)
+        : String(value);
+
+    // 调试信息
+    console.log(`[I18n] 翻译最终结果: ${key} => ${finalValue}`);
+
+    return finalValue;
+  }
+
+  /**
+   * 获取嵌套对象中的值
+   */
+  private getNestedValue(obj: any, path: string): string | undefined {
+    console.log(`[I18n] 查找嵌套键: ${path}, 对象类型:`, typeof obj);
+
+    if (!path || !obj) {
+      console.log(`[I18n] 路径或对象为空`);
+      return undefined;
+    }
+
+    // 处理路径中的点符号，分割成数组
+    const parts = path.split(".");
+    let current = obj;
+
+    // 遍历路径
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (current[part] === undefined) {
+        console.log(
+          `[I18n] 在路径 ${parts.slice(0, i + 1).join(".")} 找不到键 ${part}`
+        );
+        return undefined;
+      }
+      current = current[part];
+    }
+
+    console.log(`[I18n] 找到值:`, current);
+    return current;
+  }
+
+  /**
+   * 替换文本中的参数
+   */
+  private replaceParams(text: string, params: Record<string, string>): string {
+    return text.replace(/\{(\w+)\}/g, (match, key) => {
+      return params[key] !== undefined ? params[key] : match;
     });
   }
 
-  getLocale(): string {
-    return this.currentLocale;
+  /**
+   * 停用插件
+   */
+  deactivate(): void {
+    console.log(`[I18n] Deactivating i18n plugin...`);
+    this.initialized = false;
+    this.loaded.value = false;
   }
 
-  getLocales(): string[] {
-    return this.config.locales;
+  /**
+   * 配置插件
+   */
+  configure(options: Partial<I18nPluginConfig>): void {
+    this.config = { ...this.config, ...options };
+    console.log(`[I18n] Plugin reconfigured`);
+  }
+
+  /**
+   * 等待翻译加载完成
+   */
+  async waitForTranslations(): Promise<void> {
+    if (this.loaded.value) {
+      return;
+    }
+
+    if (this.isLoading) {
+      // 等待加载完成
+      return new Promise((resolve) => {
+        const checkLoaded = () => {
+          if (this.loaded.value) {
+            resolve();
+          } else {
+            setTimeout(checkLoaded, 50);
+          }
+        };
+
+        checkLoaded();
+      });
+    } else {
+      // 开始加载
+      await this.preloadAllTranslations();
+    }
+  }
+
+  // 添加一个新方法用于强制加载特定语言
+  async forceLoadLanguage(locale: string): Promise<boolean> {
+    console.log(`[I18n] 强制加载语言: ${locale}`);
+
+    if (this.translations[locale]) {
+      console.log(`[I18n] 该语言已加载: ${locale}`);
+      return true;
+    }
+
+    try {
+      const filePath = `${this.config.translationsDir}/${locale}.json`;
+      console.log(`[I18n] 尝试加载翻译文件: ${filePath}`);
+
+      const content = await Deno.readTextFile(filePath);
+      this.translations[locale] = JSON.parse(content);
+      console.log(
+        `[I18n] 成功加载翻译文件: ${locale}，键数量: ${
+          Object.keys(this.translations[locale]).length
+        }`
+      );
+
+      // 添加一些测试翻译结果
+      const testKey = "nav.home";
+      const testResult = this.getNestedValue(
+        this.translations[locale],
+        testKey
+      );
+      console.log(`[I18n] 测试翻译: ${testKey} => ${testResult}`);
+
+      return true;
+    } catch (error) {
+      console.error(`[I18n] 强制加载语言失败: ${locale}`, error);
+      this.failedLoads[locale] = true;
+      return false;
+    }
+  }
+
+  private findClosestLocale(browserLang: string): string | undefined {
+    const lang = browserLang.split("-")[0];
+    return this.config.locales.find((locale) => locale.startsWith(lang));
   }
 }
 
-// 切换语言函数
-export const toggleLocale = (): void => {
-  const current = currentLocale.value;
-  console.log("[I18n] 切换语言 - 当前:", current);
+// 全局单例实例，直接导出
+export const i18nPlugin = new I18nPlugin();
 
-  const locales = defaultPlugin.getLocales();
-  console.log("[I18n] 可用语言:", locales);
-
-  const index = locales.indexOf(current);
-  const nextIndex = (index + 1) % locales.length;
-  const nextLocale = locales[nextIndex];
-  console.log("[I18n] 下一个语言:", nextLocale);
-
-  // 检查翻译是否已加载
-  if (!defaultPlugin.isTranslationLoaded(nextLocale)) {
-    console.log(`[I18n] 翻译未加载，正在加载 ${nextLocale} 的翻译...`);
-
-    // 异步加载翻译
-    defaultPlugin.setLocale(nextLocale);
-    currentLocale.value = nextLocale;
-  } else {
-    // 直接更新locale
-    defaultPlugin.setLocale(nextLocale);
-    currentLocale.value = nextLocale;
-  }
-
-  // 在服务器端运行时不存在window对象
-  if (typeof window !== "undefined") {
-    // 触发语言变更事件
-    window.dispatchEvent(
-      new CustomEvent("fp:localeChange", {
-        detail: { locale: nextLocale },
-      })
-    );
-    console.log("[I18n] 已触发fp:localeChange事件");
-
-    // 存储用户选择的语言到localStorage
-    localStorage.setItem("preferred_locale", nextLocale);
-
-    // 更新HTML的lang属性
-    document.documentElement.lang = nextLocale;
-  }
-};
-
-// 导出信号和类型
-export const currentLocale = signal<string>("en-US");
-
-// 语言类型
-export type Locale = "en-US" | "zh-CN";
-
-// 创建一个默认插件实例
-const defaultPlugin = new I18nPlugin();
-
-// 导出翻译函数
+/**
+ * 翻译函数简写
+ */
 export const t = (
   key: string,
   params: Record<string, string> = {},
   locale?: string
 ): string => {
-  return defaultPlugin.translate(
-    key,
-    params,
-    locale || defaultPlugin.getLocale()
-  );
+  // 使用模块级单例而不是从globalThis获取
+  if (!i18nPlugin.initialized) {
+    console.warn(`[I18n] i18n插件未初始化，返回原始键: ${key}`);
+    return key;
+  }
+
+  return i18nPlugin.translate(key, params, locale);
 };
+
+/**
+ * 切换语言函数
+ */
+export function toggleLocale(): void {
+  // 使用模块级单例
+  if (!i18nPlugin.initialized) {
+    console.warn(`[I18n] i18n插件未初始化，无法切换语言`);
+    return;
+  }
+
+  const currentLocale = i18nPlugin.getLocale();
+  const locales = i18nPlugin.getLocales();
+
+  if (locales.length < 2) {
+    console.warn(`[I18n] 可用语言少于2种，无法切换`);
+    return;
+  }
+
+  // 获取当前语言在列表中的索引
+  const currentIndex = locales.indexOf(currentLocale);
+
+  // 计算下一个语言的索引（循环）
+  const nextIndex = (currentIndex + 1) % locales.length;
+
+  // 设置新语言
+  i18nPlugin.setLocale(locales[nextIndex]);
+
+  // 触发自定义事件，通知其他组件语言已更改
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("localechange", {
+        detail: { locale: locales[nextIndex] },
+      })
+    );
+  }
+}
+
+// 为window添加全局翻译函数
+declare global {
+  interface Window {
+    __t: (
+      key: string,
+      params?: Record<string, string>,
+      locale?: string
+    ) => string;
+    __translations: Record<string, any>;
+    __currentLocale: string;
+  }
+}
+
+/**
+ * 从全局对象获取翻译值
+ */
+function getTranslationFromGlobal(
+  key: string,
+  params: Record<string, string> = {},
+  locale?: string
+): string | undefined {
+  if (typeof window === "undefined") return undefined;
+
+  const targetLocale = locale || window.__currentLocale || "en-US";
+  const translations = window.__translations || {};
+  const dictionary = translations[targetLocale];
+
+  if (!dictionary) return undefined;
+
+  // 处理嵌套键
+  const parts = key.split(".");
+  let value = dictionary;
+
+  for (const part of parts) {
+    if (!value || typeof value !== "object") return undefined;
+    value = value[part];
+  }
+
+  if (value === undefined) return undefined;
+
+  // 替换参数
+  if (typeof value === "string" && Object.keys(params).length > 0) {
+    return value.replace(/\{(\w+)\}/g, (_, paramName) => {
+      return params[paramName] || `{${paramName}}`;
+    });
+  }
+
+  return String(value);
+}

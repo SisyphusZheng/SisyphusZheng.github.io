@@ -3,32 +3,53 @@
  * 定义了FreshPress的插件模型和操作方法
  */
 
+import { App } from "./app.ts";
+
 /**
- * 插件接口
+ * 插件基础接口
  */
 export interface Plugin {
   /** 插件名称 */
   name: string;
+
   /** 插件版本 */
   version: string;
+
   /** 插件描述 */
   description: string;
+
   /** 插件作者 */
   author: string;
-  /** 插件依赖 */
-  dependencies?: string[];
-  /** 插件配置 */
-  config?: Record<string, any>;
-  /** 安装插件 */
-  install(): Promise<void>;
-  /** 卸载插件 */
-  uninstall(): Promise<void>;
-  /** 激活插件 */
-  activate(): Promise<void>;
-  /** 停用插件 */
-  deactivate(): Promise<void>;
-  /** 配置插件 */
-  configure(options: Record<string, any>): Promise<void>;
+
+  /** 插件日志级别 */
+  severity: string;
+
+  /**
+   * 安装插件
+   */
+  install?(app?: App): void;
+
+  /**
+   * 激活插件
+   */
+  activate?(): Promise<void>;
+
+  /**
+   * 停用插件
+   */
+  deactivate?(): void;
+
+  /**
+   * 配置插件
+   */
+  configure?(options: any): void;
+}
+
+/**
+ * 应用接口
+ */
+export interface App {
+  use(plugin: Plugin): void;
 }
 
 /**

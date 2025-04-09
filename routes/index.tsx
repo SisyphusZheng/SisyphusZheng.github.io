@@ -1,116 +1,217 @@
 import { h } from "preact";
-import { Handlers } from "$fresh/server.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
 import Layout from "../components/Layout.tsx";
 import Hero from "../components/Hero.tsx";
-import { siteConfig } from "../docs/config.ts";
 import { BlogPlugin } from "../plugins/blog/mod.ts";
 import type { BlogPost } from "../core/content.ts";
-import {
-  getContent,
-  getFeatures,
-  getQuickStartSteps,
-  getChangelogVersions,
-  type Locale,
-} from "../docs/content.ts";
-import { I18nPlugin } from "../plugins/i18n/mod.ts";
+import { i18nPlugin, t } from "../plugins/i18n/mod.ts";
 import { ProjectsPlugin } from "../plugins/projects/mod.ts";
 import { getProjects } from "../plugins/projects/mod.ts";
+import { initPlugins } from "../plugins/mod.ts";
 
-// Create blog plugin instance
-const blogPlugin = new BlogPlugin();
-// Create i18n plugin instance
-const i18nPlugin = new I18nPlugin();
+// 创建插件实例
+const blogPlugin = new BlogPlugin({
+  postsDir: "docs/blog",
+});
 const projectsPlugin = new ProjectsPlugin();
 
-// Manually set initialized to true, force activation
-blogPlugin.initialized = true;
-projectsPlugin.initialized = true;
+// 首页Props类型定义
+export interface HomeProps {
+  latestPost?: BlogPost;
+  latestProject?: any;
+  features: Array<{ title: string; description: string }>;
+  quickStart: Array<{ title: string; description: string }>;
+  locale?: string;
+  translations?: Record<string, any>;
+  error?: string;
+}
+
+// 初始化函数，在handler中调用
+async function initPlugins() {
+  if (!i18nPlugin.initialized) {
+    await i18nPlugin.activate();
+  }
+  if (!blogPlugin.initialized) {
+    await blogPlugin.activate();
+  }
+  if (!projectsPlugin.initialized) {
+    await projectsPlugin.activate();
+  }
+}
 
 export const handler: Handlers = {
-  async GET(req: Request, ctx: any) {
-    // Get language setting from URL query parameter
-    const url = new URL(req.url);
-    const langParam = url.searchParams.get("lang");
-    const locale =
-      langParam === "zh-CN" || langParam === "en-US"
-        ? (langParam as Locale)
-        : "en-US";
-
-    // Set current language for i18n plugin
-    i18nPlugin.setLocale(locale);
-
-    // Prepare data object
-    const data: any = {
-      features: getFeatures(locale),
-      quickStartSteps: getQuickStartSteps(locale),
-      changelogVersions: getChangelogVersions(locale),
-      locale,
-    };
-
-    // Load blog posts - no condition check, load without checking plugin status
+  async GET(req, ctx) {
     try {
-      const posts = await blogPlugin.loadPosts();
-      if (posts && posts.length > 0) {
-        data.latestPost = posts[0];
-      }
-    } catch (error) {
-      console.error("Failed to load blog posts:", error);
-    }
+      // 初始化插件
+      await initPlugins();
 
-    // Load projects - no condition check, load without checking plugin status
-    try {
-      // Use getProjects helper function to load projects
-      const projects = await getProjects();
-      if (projects && projects.length > 0) {
-        data.latestProject = projects[0];
-      } else if (
-        siteConfig.projects?.items &&
-        siteConfig.projects.items.length > 0
-      ) {
-        // Fallback to configured project
-        data.latestProject = siteConfig.projects.items[0];
-      }
-    } catch (error) {
-      console.error("Failed to load projects:", error);
-    }
+      // 获取语言设置
+      const url = new URL(req.url);
+      const lang = url.searchParams.get("lang") || "en-US";
+      console.log(`[Home] 当前语言参数: ${lang}`);
 
-    return ctx.render(data);
+      // 设置当前语言
+      i18nPlugin.setLocale(lang);
+      console.log(`[Home] 当前语言已设置为: ${i18nPlugin.getLocale()}`);
+
+      // 确保翻译已加载
+      await i18nPlugin.waitForTranslations();
+
+      // 强制加载所有语言
+      for (const locale of i18nPlugin.getLocales()) {
+        await i18nPlugin.forceLoadLanguage(locale);
+      }
+
+      // 获取所有翻译
+      const translations = i18nPlugin.getTranslations();
+      console.log(`[Home] 已加载翻译:`, Object.keys(translations));
+
+      // 测试当前语言的翻译
+      console.log(
+        `[Home] 测试翻译:`,
+        t("nav.home", {}, lang),
+        t("nav.blog", {}, lang),
+        t("nav.projects", {}, lang),
+        t("nav.resume", {}, lang)
+      );
+
+      // 准备数据
+      const data = {
+        features: [
+          {
+            title: t("features.performance.title"),
+            description: t("features.performance.description"),
+            icon: "⚡",
+          },
+          {
+            title: t("features.security.title"),
+            description: t("features.security.description"),
+            icon: "🔒",
+          },
+          {
+            title: t("features.development.title"),
+            description: t("features.development.description"),
+            icon: "🚀",
+          },
+        ],
+        quickStart: [
+          {
+            title: t("quickStart.install.title"),
+            description: t("quickStart.install.description"),
+          },
+          {
+            title: t("quickStart.configure.title"),
+            description: t("quickStart.configure.description"),
+          },
+          {
+            title: t("quickStart.deploy.title"),
+            description: t("quickStart.deploy.description"),
+          },
+        ],
+        locale: lang,
+        translations: translations, // 传递翻译给客户端
+      };
+
+      // 加载博客文章
+      try {
+        const posts = await blogPlugin.loadPosts();
+        if (posts && posts.length > 0) {
+          data.latestPost = posts[0];
+        }
+      } catch (error) {
+        console.error("加载博客文章失败:", error);
+      }
+
+      // 加载项目
+      try {
+        const projects = await getProjects();
+        if (projects && Array.isArray(projects) && projects.length > 0) {
+          data.latestProject = projects[0];
+        }
+      } catch (error) {
+        console.error("加载项目失败:", error);
+      }
+
+      return ctx.render(data);
+    } catch (error) {
+      console.error("[Home] 初始化错误:", error);
+      return new Response("Internal Server Error", { status: 500 });
+    }
   },
 };
 
-export default function Home({
-  data,
-}: {
-  data: {
-    latestPost?: BlogPost;
-    latestProject?: any;
-    features: any[];
-    quickStartSteps: any[];
-    changelogVersions: any[];
-    locale?: Locale;
-  };
-}) {
-  const {
-    latestPost,
-    latestProject,
-    features,
-    quickStartSteps,
-    changelogVersions,
-    locale,
-  } = data;
+export default function Home(props: PageProps<HomeProps>) {
+  // 提取数据
+  const { features, quickStart, locale, translations, error } = props.data;
 
-  // Use locale from server
-  const effectiveLocale = locale || "en-US";
+  // 处理错误页面
+  if (error) {
+    return (
+      <div class="text-center p-10">
+        <h1 class="text-red-500 text-2xl">错误</h1>
+        <p>{error}</p>
+        <a href="/" class="text-blue-500 underline">
+          返回首页
+        </a>
+      </div>
+    );
+  }
+
+  // 注入翻译数据到全局对象
+  if (typeof window !== "undefined" && translations) {
+    console.log(`[Home] 向全局注入翻译数据，当前语言: ${locale}`);
+    window.__translations = translations;
+    window.__currentLocale = locale || "en-US";
+
+    // 测试全局翻译
+    setTimeout(() => {
+      const items = ["nav.home", "nav.blog", "nav.projects", "nav.resume"];
+      for (const key of items) {
+        console.log(
+          `[Home] 全局翻译测试 - ${key}:`,
+          window.__t ? window.__t(key) : "全局翻译函数不存在"
+        );
+      }
+
+      // 输出全局翻译对象内容
+      if (window.__translations && window.__currentLocale) {
+        const dict = window.__translations[window.__currentLocale];
+        if (dict && dict.nav) {
+          console.log("[Home] 导航翻译字典：", dict.nav);
+        } else {
+          console.warn("[Home] 找不到导航翻译字典！");
+        }
+      }
+    }, 100);
+  }
+
+  // 使用服务器传递的语言
+  const lang = locale || "en-US";
 
   return (
-    <Layout>
-      <Hero locale={effectiveLocale} />
+    <Layout locale={lang}>
+      <Hero
+        title={t("hero.title")}
+        subtitle={t("hero.subtitle")}
+        buttons={[
+          {
+            text: t("hero.blog"),
+            href: "/blog",
+            isPrimary: true,
+          },
+          {
+            text: t("hero.projects"),
+            href: "/projects",
+            isPrimary: false,
+          },
+        ]}
+      />
 
-      {/* Feature Showcase */}
+      {/* 1. 特性展示 */}
       <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
-            {getContent(["features", "title"], effectiveLocale)}
+            {t("features.title")}
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature) => (
@@ -126,263 +227,196 @@ export default function Home({
         </div>
       </section>
 
-      {/* Latest Updates */}
-      <section class="py-16 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 dark:text-white transition-colors">
+      {/* 2. 快速开始 */}
+      <section class="py-16 bg-white dark:bg-gray-800 dark:text-white transition-colors">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
-            {getContent(["news", "title"], effectiveLocale)}
+            {t("quickStart.title")}
           </h2>
-          <div class="grid md:grid-cols-2 gap-8">
-            {/* Latest blog post - always show, no condition check */}
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
-              <h3 class="text-xl font-semibold mb-4">
-                <span class="text-blue-500">📰</span>{" "}
-                {getContent(["news", "blog", "title"], effectiveLocale)}
-              </h3>
-              {latestPost ? (
-                <>
-                  <h4 class="text-lg font-medium mb-2">
-                    <a
-                      href={`/blog/${latestPost.slug}`}
-                      class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                    >
-                      {latestPost.title}
-                    </a>
-                  </h4>
-                  <p class="text-gray-500 dark:text-gray-400 mb-2">
-                    {new Date(latestPost.date || new Date()).toLocaleDateString(
-                      effectiveLocale === "zh-CN" ? "zh-CN" : "en-US",
-                      { year: "numeric", month: "short", day: "numeric" }
+          <div class="max-w-3xl mx-auto">
+            <div class="space-y-6">
+              {quickStart.map((step, index) => (
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">
+                    {index + 1}
+                  </div>
+                  <div class="ml-4">
+                    <h3 class="text-xl font-semibold mb-2">{step.title}</h3>
+                    <p class="text-gray-600 dark:text-gray-300">
+                      {step.description}
+                    </p>
+                    {step.code && (
+                      <div class="mt-2 p-3 bg-gray-800 text-gray-200 rounded-md overflow-x-auto">
+                        <code>{step.code}</code>
+                      </div>
                     )}
-                    {latestPost.author && <> · {latestPost.author}</>}
-                    {latestPost.readingTime && (
-                      <> · {latestPost.readingTime} min read</>
-                    )}
-                  </p>
-                  {latestPost.cover && (
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. 最新博客 */}
+      {props.data.latestPost && (
+        <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
+          <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+              {t("latestBlog.title")}
+            </h2>
+            <div class="max-w-3xl mx-auto">
+              <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
+                <h3 class="text-2xl font-bold mb-3">
+                  <a
+                    href={`/blog/${props.data.latestPost.id}`}
+                    class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                  >
+                    {props.data.latestPost.title}
+                  </a>
+                </h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-3">
+                  {new Date(
+                    props.data.latestPost.date || new Date()
+                  ).toLocaleDateString(lang === "zh-CN" ? "zh-CN" : "en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {props.data.latestPost.author && (
+                    <> · {props.data.latestPost.author}</>
+                  )}
+                  {props.data.latestPost.readingTime && (
+                    <> · {props.data.latestPost.readingTime} min read</>
+                  )}
+                </p>
+                {props.data.latestPost.cover &&
+                  props.data.latestPost.cover.trim() && (
                     <div class="mb-4">
                       <img
-                        src={latestPost.cover}
-                        alt={latestPost.title}
-                        class="w-full h-48 object-cover rounded-md"
+                        src={
+                          props.data.latestPost.cover.startsWith("/")
+                            ? props.data.latestPost.cover
+                            : `/${props.data.latestPost.cover}`
+                        }
+                        alt={props.data.latestPost.title}
+                        class="w-full h-64 object-cover rounded-md"
+                        onerror="this.style.display='none'"
                       />
                     </div>
                   )}
-                  <div class="text-gray-600 dark:text-gray-300 mb-4 prose dark:prose-dark max-w-none">
-                    {latestPost.description ||
-                      (latestPost.content && (
-                        <p>
-                          {latestPost.content
-                            .split("\n")
-                            .slice(0, 3)
-                            .join(" ")
-                            .substring(0, 300)}
-                          {latestPost.content.length > 300 && "..."}
-                        </p>
-                      ))}
-                  </div>
-                  {latestPost.tags && latestPost.tags.length > 0 && (
-                    <div class="flex flex-wrap gap-2 mb-4">
-                      {latestPost.tags.map((tag) => (
-                        <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <a
-                    href={`/blog/${latestPost.slug}`}
-                    class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
+                <div class="text-gray-600 dark:text-gray-300 mb-4">
+                  {props.data.latestPost.description ||
+                    (props.data.latestPost.content && (
+                      <p>
+                        {props.data.latestPost.content
+                          .split("\n")
+                          .slice(0, 3)
+                          .join(" ")
+                          .substring(0, 300)}
+                        {props.data.latestPost.content.length > 300 && "..."}
+                      </p>
+                    ))}
+                </div>
+                <a
+                  href={`/blog/${props.data.latestPost.id}`}
+                  class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
+                >
+                  {t("latestBlog.readMore")}
+                  <svg
+                    class="w-4 h-4 ml-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {getContent(["news", "blog", "readMore"], effectiveLocale)}
-                    <svg
-                      class="w-4 h-4 ml-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </a>
-                </>
-              ) : (
-                <p class="text-gray-600 dark:text-gray-300">
-                  {effectiveLocale === "zh-CN"
-                    ? "暂无博客文章"
-                    : "No blog posts yet"}
-                </p>
-              )}
-            </div>
-
-            {/* Changelog */}
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
-              <h3 class="text-xl font-semibold mb-4">
-                <span class="text-blue-500">📋</span>{" "}
-                {getContent(["news", "updates", "title"], effectiveLocale)}
-              </h3>
-              <div class="space-y-4">
-                {changelogVersions.map((version) => (
-                  <div>
-                    <h4 class="text-lg font-medium mb-1">{version.version}</h4>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-2">
-                      {version.date}
-                    </p>
-                    <ul class="text-gray-600 dark:text-gray-300 text-sm list-disc pl-5 space-y-1">
-                      {version.changes.map((change: string) => (
-                        <li>{change}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </a>
               </div>
             </div>
+          </div>
+        </section>
+      )}
 
-            {/* If there's a latest project, show project card */}
-            {latestProject && (
+      {/* 4. 项目展示 */}
+      <section class="py-16 bg-white dark:bg-gray-800 dark:text-white transition-colors">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-3xl font-bold text-center mb-12 animate-fade-in">
+            {t("projectShowcase.title")}
+          </h2>
+          <div class="grid md:grid-cols-2 gap-8">
+            {projectsPlugin.initialized && props.data.latestProject && (
               <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100 dark:border-gray-700 md:col-span-2">
-                <h3 class="text-xl font-semibold mb-4">
-                  <span class="text-blue-500">🚀</span>{" "}
-                  {effectiveLocale === "zh-CN" ? "最新项目" : "Latest Project"}
-                </h3>
                 <div class="md:flex gap-6">
-                  {latestProject.image && (
-                    <div class="md:w-1/3 mb-4 md:mb-0">
-                      <img
-                        src={latestProject.image}
-                        alt={latestProject.title || latestProject.name}
-                        class="w-full h-48 md:h-full object-cover rounded-md"
-                      />
+                  {props.data.latestProject.demoUrl && (
+                    <div class="md:w-1/2 mb-4 md:mb-0">
+                      <div class="relative w-full h-64 md:h-80 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
+                        <iframe
+                          src={props.data.latestProject.demoUrl}
+                          class="absolute top-0 left-0 w-full h-full"
+                          title={
+                            props.data.latestProject.title ||
+                            props.data.latestProject.name
+                          }
+                          loading="lazy"
+                          sandbox="allow-scripts allow-same-origin"
+                        ></iframe>
+                      </div>
                     </div>
                   )}
-                  <div class={latestProject.image ? "md:w-2/3" : "w-full"}>
-                    <h4 class="text-lg font-medium mb-2">
-                      <a
-                        href={`/projects/${
-                          latestProject.slug || latestProject.id
-                        }`}
-                        class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                      >
-                        {latestProject.title || latestProject.name}
-                      </a>
-                    </h4>
+                  <div
+                    class={
+                      props.data.latestProject.demoUrl ? "md:w-1/2" : "w-full"
+                    }
+                  >
+                    <h3 class="text-2xl font-bold mb-4">
+                      {props.data.latestProject.title ||
+                        props.data.latestProject.name}
+                    </h3>
                     <p class="text-gray-600 dark:text-gray-300 mb-4">
-                      {latestProject.description}
+                      {props.data.latestProject.description}
                     </p>
-
-                    {latestProject.technologies &&
-                      latestProject.technologies.length > 0 && (
+                    {props.data.latestProject.technologies &&
+                      props.data.latestProject.technologies.length > 0 && (
                         <div class="mb-4">
-                          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                            {effectiveLocale === "zh-CN"
-                              ? "技术栈："
-                              : "Technologies:"}
-                          </p>
+                          <h4 class="text-lg font-medium mb-2">
+                            {t("projectShowcase.technologies")}
+                          </h4>
                           <div class="flex flex-wrap gap-2">
-                            {latestProject.technologies.map((tech: string) => (
-                              <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full">
-                                {tech}
-                              </span>
-                            ))}
+                            {props.data.latestProject.technologies.map(
+                              (tech) => (
+                                <span class="text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
+                                  {tech}
+                                </span>
+                              )
+                            )}
                           </div>
                         </div>
                       )}
-
-                    {latestProject.features &&
-                      latestProject.features.length > 0 && (
-                        <div class="mb-4">
-                          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                            {effectiveLocale === "zh-CN"
-                              ? "主要功能："
-                              : "Key Features:"}
-                          </p>
-                          <ul class="text-gray-600 dark:text-gray-300 text-sm list-disc pl-5 space-y-1">
-                            {latestProject.features
-                              .slice(0, 3)
-                              .map((feature: string) => (
-                                <li>{feature}</li>
-                              ))}
-                            {latestProject.features.length > 3 && (
-                              <li class="text-gray-500 dark:text-gray-400">
-                                {effectiveLocale === "zh-CN"
-                                  ? `...还有 ${
-                                      latestProject.features.length - 3
-                                    } 项功能`
-                                  : `...and ${
-                                      latestProject.features.length - 3
-                                    } more features`}
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
-
-                    <div class="flex gap-4">
-                      <a
-                        href={`/projects/${
-                          latestProject.slug || latestProject.id
-                        }`}
-                        class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center"
-                      >
-                        {effectiveLocale === "zh-CN"
-                          ? "查看详情"
-                          : "View Details"}
-                        <svg
-                          class="w-4 h-4 ml-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </a>
-                      {latestProject.demoUrl && (
+                    <div class="flex gap-4 mt-6">
+                      {props.data.latestProject.demoUrl && (
                         <a
-                          href={latestProject.demoUrl}
+                          href={props.data.latestProject.demoUrl}
                           target="_blank"
-                          class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 inline-flex items-center"
+                          rel="noopener noreferrer"
+                          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
                         >
-                          {effectiveLocale === "zh-CN"
-                            ? "在线演示"
-                            : "Live Demo"}
-                          <svg
-                            class="w-4 h-4 ml-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
+                          {t("projectShowcase.viewDemo")}
                         </a>
                       )}
-                      {latestProject.githubUrl && (
+                      {props.data.latestProject.githubUrl && (
                         <a
-                          href={latestProject.githubUrl}
+                          href={props.data.latestProject.githubUrl}
                           target="_blank"
-                          class="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 inline-flex items-center"
+                          rel="noopener noreferrer"
+                          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md transition-colors"
                         >
-                          {effectiveLocale === "zh-CN" ? "GitHub" : "GitHub"}
-                          <svg
-                            class="w-4 h-4 ml-1"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                          </svg>
+                          {t("projectShowcase.githubRepo")}
                         </a>
                       )}
                     </div>
@@ -390,42 +424,6 @@ export default function Home({
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Start */}
-      <section class="py-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white transition-colors">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 class="text-3xl font-bold text-center mb-8 animate-fade-in">
-            {getContent(["quickStart", "title"], effectiveLocale)}
-          </h2>
-          <p class="text-center text-lg mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-300">
-            {getContent(["quickStart", "subtitle"], effectiveLocale)}
-          </p>
-
-          {quickStartSteps.map((step) => (
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-700 mb-8">
-              <h3 class="text-xl font-semibold mb-4">{step.title}</h3>
-              <div class="overflow-x-auto">
-                <code class="font-mono text-gray-800 dark:text-gray-200">
-                  $ {step.code}
-                </code>
-              </div>
-            </div>
-          ))}
-
-          <div class="text-center mt-12">
-            <a
-              href={getContent(["quickStart", "cta", "link"], effectiveLocale)}
-              class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
-              target="_blank"
-            >
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-              </svg>
-              {getContent(["quickStart", "cta", "text"], effectiveLocale)}
-            </a>
           </div>
         </div>
       </section>

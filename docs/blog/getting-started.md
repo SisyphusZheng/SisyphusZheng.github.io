@@ -4,7 +4,7 @@ slug: getting-started
 date: 2024-04-10
 author: zhizheng
 excerpt: 了解如何使用 FreshPress 快速搭建现代化静态网站，从安装到发布，全面指南。
-cover: /images/blog/getting-started.jpg
+cover: /static/favicon.svg
 tags:
   - 教程
   - 入门
