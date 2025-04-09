@@ -9,9 +9,9 @@ import { parseMarkdownFiles } from "../core/content.ts";
 // 导入配置助手
 import { main as generateConfig } from "./config-helper.ts";
 
-// 使用兼容的方式导入Fresh构建工具
-import { FreshConfig } from "$fresh/server.ts";
-import { Command } from "$fresh/src/command/mod.ts";
+// 移除了对不存在模块的引用
+// import { FreshConfig } from "$fresh/server.ts";
+// import { Command } from "$fresh/src/command/mod.ts";
 
 console.log("🍋 FreshPress 静态站点构建开始...");
 
@@ -60,12 +60,10 @@ await ensureDir(OUTPUT_DIR);
 
 console.log("🏗️ 开始构建静态站点...");
 
-// 使用新的构建方法
+// 执行Fresh构建命令
 try {
-  // 使用Fresh命令行工具构建项目
-  const command = new Command<FreshConfig>("build", "Build the project");
+  console.log("📦 执行Fresh构建命令...");
 
-  // 直接执行build命令
   const process = new Deno.Command(Deno.execPath(), {
     args: [
       "run",
@@ -86,7 +84,7 @@ try {
   const { code } = await process.output();
 
   if (code === 0) {
-    console.log(`🏗️ 构建完成，静态文件已生成到 ${OUTPUT_DIR}/ 目录`);
+    console.log(`🏗️ Fresh构建完成，静态文件已生成到 ${OUTPUT_DIR}/ 目录`);
   } else {
     throw new Error(`构建失败，退出码: ${code}`);
   }
@@ -97,16 +95,14 @@ try {
 
 // 复制静态资源
 try {
-  const publicDir = join(ROOT_DIR, "public");
-  const publicDirExists = await Deno.stat(publicDir).then(
-    (stat) => stat.isDirectory,
-    () => false
-  );
+  console.log("📦 开始复制静态资源...");
+  const staticDir = join(ROOT_DIR, "static");
+  const targetDir = join(OUTPUT_DIR);
 
-  if (publicDirExists) {
-    console.log("📦 复制 public/ 目录中的静态资源...");
-    await copy(publicDir, join(OUTPUT_DIR, "public"), { overwrite: true });
-  }
+  console.log(`📦 从 ${staticDir} 复制到 ${targetDir}`);
+
+  await copy(staticDir, targetDir, { overwrite: true });
+  console.log("✅ 静态资源复制完成");
 } catch (error) {
   console.error("复制静态资源时出错:", error);
 }

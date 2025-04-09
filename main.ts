@@ -1,52 +1,28 @@
 #!/usr/bin/env -S deno run -A
 
-import { start } from "$fresh/server.ts";
-import manifest from "./fresh.gen.ts";
-import config from "./fresh.config.ts";
-import { join } from "$std/path/mod.ts";
-import { exists } from "$std/fs/exists.ts";
+/// <reference no-default-lib="true" />
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
+/// <reference lib="dom.asynciterable" />
+/// <reference lib="deno.ns" />
 
-/**
- * FreshPress - Modern static site generator based on Fresh framework
- *
- * Usage:
- * 1. Development: deno task dev
- * 2. Build: deno task build
- * 3. Preview: deno task preview
- * 4. Deploy: deno task deploy
- */
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { serveDir } from "https://deno.land/std@0.208.0/http/file_server.ts";
 
-console.log("🍋 FreshPress - 正在启动服务器...");
+// 从环境变量获取端口，默认为8000
+const PORT = parseInt(Deno.env.get("PORT") || "8000");
 
-// 收集环境变量
-const PORT = Deno.env.get("PORT") || "8000";
-const DEBUG = Deno.env.get("DEBUG") === "true";
+// 启动HTTP服务器
+console.log(`🚀 启动FreshPress静态服务器，端口：${PORT}`);
 
-// 检查项目结构
-try {
-  // 检查是否存在 docs 目录
-  const docsExists = await exists("docs");
-  if (docsExists) {
-    console.log("📚 找到文档目录: docs/");
-  }
-
-  // 检查是否存在 freshpress.config.ts 文件
-  const configExists = await exists("freshpress.config.ts");
-  if (configExists) {
-    console.log("⚙️ 找到配置文件: freshpress.config.ts");
-  }
-} catch (error) {
-  console.error("检查项目结构时出错:", error);
-}
-
-// 环境信息
-if (DEBUG) {
-  console.log(`启动服务器，端口: ${PORT}`);
-  console.log(
-    `环境: ${Deno.env.get("DENO_DEPLOYMENT_ID") ? "Deno Deploy" : "本地开发"}`
-  );
-}
-
-// 启动Fresh服务器
-await start(manifest, { ...config.plugins, port: Number(PORT) });
-console.log(`🌐 服务器已启动: http://localhost:${PORT}`);
+serve(
+  async (req) => {
+    return await serveDir(req, {
+      fsRoot: "./_site",
+      urlRoot: "",
+      showDirListing: false,
+      enableCors: true,
+    });
+  },
+  { port: PORT }
+);

@@ -11,6 +11,7 @@ export default defineConfig({
   },
   router: {
     trailingSlash: true,
+    basePath: "",
   },
   server: {
     port: 8000,

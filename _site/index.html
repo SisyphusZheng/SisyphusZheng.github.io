@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshPress - 临时主页</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/css/themes/default.css" id="theme-default" />
+    <link
+      rel="stylesheet"
+      href="/css/themes/dark.css"
+      id="theme-dark"
+      media="(prefers-color-scheme: dark)"
+    />
+    <script>
+      // 检测系统暗色模式
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      // 读取用户设置
+      const savedTheme = localStorage.getItem("theme");
+
+      // 应用主题
+      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <header class="text-center mb-12">
+        <h1
+          class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2"
+        >
+          FreshPress
+        </h1>
+        <p class="text-gray-700 dark:text-gray-300 text-xl">
+          现代、快速的静态站点生成器
+        </p>
+      </header>
+
+      <main class="prose dark:prose-invert mx-auto">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h2 class="text-2xl font-semibold mb-4">临时主页</h2>
+          <p>这是FreshPress的临时主页。您正在查看静态服务器提供的内容。</p>
+          <p>
+            如果您看到这个页面且样式正常显示，说明静态文件服务器正在正常工作。
+          </p>
+
+          <div class="mt-8">
+            <h3 class="text-xl font-medium mb-2">样式测试</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div class="bg-primary-100 dark:bg-primary-900 p-4 rounded">
+                主色卡片 1
+              </div>
+              <div class="bg-primary-200 dark:bg-primary-800 p-4 rounded">
+                主色卡片 2
+              </div>
+              <div class="bg-primary-300 dark:bg-primary-700 p-4 rounded">
+                主色卡片 3
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="mt-12 text-center text-gray-600 dark:text-gray-400">
+        <p>© 2023 FreshPress. 由 Fresh 和 Deno 提供支持。</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -94,7 +94,7 @@ serve(
       return new Response("404 - 未找到页面", { status: 404 });
     }
   },
-  { port: PORT }
+  { port: PORT, hostname: "0.0.0.0" }
 );
 
 console.log(`🌐 预览服务器已启动: http://localhost:${PORT}`);

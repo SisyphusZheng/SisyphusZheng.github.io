@@ -20,19 +20,40 @@ async function runTask(taskName: string): Promise<boolean> {
   try {
     console.log(`\n📋 执行任务: ${taskName}`);
 
-    const process = Deno.run({
-      cmd: ["deno", "task", taskName],
+    // 先检查任务是否存在
+    try {
+      const checkProcess = new Deno.Command("deno", {
+        args: ["task", "--help"],
+        stdout: "piped",
+        stderr: "piped",
+      });
+
+      const { stdout } = await checkProcess.output();
+      const output = new TextDecoder().decode(stdout);
+
+      // 如果输出中没有包含这个任务名称，说明任务不存在
+      if (!output.includes(taskName)) {
+        console.warn(`⚠️ 任务 ${taskName} 不存在，跳过`);
+        return true; // 返回true以继续执行后续任务
+      }
+    } catch (e) {
+      // 检查失败，继续尝试执行任务
+      console.warn(`⚠️ 检查任务 ${taskName} 是否存在时出错，将尝试执行`);
+    }
+
+    const process = new Deno.Command("deno", {
+      args: ["task", taskName],
       stdout: "inherit",
       stderr: "inherit",
     });
 
-    const status = await process.status();
+    const { code } = await process.output();
 
-    if (status.success) {
+    if (code === 0) {
       console.log(`✅ 任务 ${taskName} 成功完成`);
       return true;
     } else {
-      console.error(`❌ 任务 ${taskName} 执行失败，退出码: ${status.code}`);
+      console.error(`❌ 任务 ${taskName} 执行失败，退出码: ${code}`);
       return false;
     }
   } catch (error) {
