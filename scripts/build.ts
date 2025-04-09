@@ -93,15 +93,33 @@ try {
   Deno.exit(1);
 }
 
-// 复制静态资源
+// 复制静态资源，但不包括index.html
 try {
   console.log("📦 开始复制静态资源...");
   const staticDir = join(ROOT_DIR, "static");
   const targetDir = join(OUTPUT_DIR);
 
-  console.log(`📦 从 ${staticDir} 复制到 ${targetDir}`);
+  console.log(`📦 从 ${staticDir} 复制到 ${targetDir}，但跳过index.html`);
 
-  await copy(staticDir, targetDir, { overwrite: true });
+  // 自定义复制函数
+  for await (const entry of Deno.readDir(staticDir)) {
+    const sourcePath = join(staticDir, entry.name);
+    const destPath = join(targetDir, entry.name);
+
+    // 跳过index.html
+    if (entry.name === "index.html") {
+      console.log(`⏩ 跳过 index.html`);
+      continue;
+    }
+
+    if (entry.isDirectory) {
+      await copy(sourcePath, destPath, { overwrite: true });
+    } else {
+      await Deno.copyFile(sourcePath, destPath);
+    }
+    console.log(`✅ 已复制: ${entry.name}`);
+  }
+
   console.log("✅ 静态资源复制完成");
 } catch (error) {
   console.error("复制静态资源时出错:", error);

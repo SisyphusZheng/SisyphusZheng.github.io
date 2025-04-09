@@ -6,23 +6,16 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { serveDir } from "https://deno.land/std@0.208.0/http/file_server.ts";
+import { start } from "$fresh/server.ts";
+import manifest from "./fresh.gen.ts";
+import config from "./fresh.config.ts";
 
-// 从环境变量获取端口，默认为8000
-const PORT = parseInt(Deno.env.get("PORT") || "8000");
+/**
+ * FreshPress - Modern static site generator based on Fresh framework
+ *
+ * Usage:
+ * 1. Development: deno task start
+ * 2. Build: deno task build
+ */
 
-// 启动HTTP服务器
-console.log(`🚀 启动FreshPress静态服务器，端口：${PORT}`);
-
-serve(
-  async (req) => {
-    return await serveDir(req, {
-      fsRoot: "./_site",
-      urlRoot: "",
-      showDirListing: false,
-      enableCors: true,
-    });
-  },
-  { port: PORT }
-);
+await start(manifest, config);
