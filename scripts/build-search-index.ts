@@ -5,7 +5,7 @@
  * 此脚本用于生成网站的搜索索引文件，专门针对博客、项目和简历
  */
 
-import { SearchPlugin } from "../plugins/search/mod";
+import { SearchPlugin } from "../plugins/search/mod.ts";
 
 console.log("🔍 开始构建搜索索引...");
 

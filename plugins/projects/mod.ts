@@ -3,7 +3,7 @@
  * 提供项目展示和管理功能
  */
 
-import { Plugin } from "../../core/plugin";
+import { Plugin } from "../../core/plugin.ts";
 import * as path from "https://deno.land/std@0.208.0/path/mod.ts";
 
 /**

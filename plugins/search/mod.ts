@@ -3,8 +3,8 @@
  * 提供全文搜索功能
  */
 
-import { Plugin } from "../../core/plugin";
-import { Content } from "../../core/content";
+import { Plugin } from "../../core/plugin.ts";
+import { Content } from "../../core/content.ts";
 import { join } from "https://deno.land/std@0.177.0/path/mod.ts";
 
 /**
