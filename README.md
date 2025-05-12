@@ -1,3 +1,5 @@
+# It still can't be used now. It's a prototype!!
+
 # FreshPress
 
 FreshPress is a modern static site generator based on [Deno](https://deno.land) and [Fresh](https://fresh.deno.dev), designed for creating high-performance websites with a great developer experience.
@@ -42,11 +44,3 @@ FreshPress includes several core plugins:
 - **i18n**: Internationalization support
 - **Content**: Generic content management
 - **Date**: Date formatting and localization
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for more information.
-
-## License
-
-FreshPress is open source software licensed under the [MIT license](LICENSE).
