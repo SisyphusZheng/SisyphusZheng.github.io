@@ -44,4 +44,4 @@ FreshPress includes several core plugins:
 - **i18n**: Internationalization support
 - **Content**: Generic content management
 - **Date**: Date formatting and localization
-[- **Screenshot**: Simple Screenshot plugin](https://github.com/SisyphusZheng/fresh-plugins-screenshot) can be use right now
+- [ **Screenshot**: Simple Screenshot plugin](https://github.com/SisyphusZheng/fresh-plugins-screenshot) can be use right now
