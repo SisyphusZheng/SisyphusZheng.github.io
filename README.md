@@ -1,47 +1,14 @@
-# It still can't be used now. It's a prototype!!
+## FreshPress
+### 🚧 Development Preview: Core architecture under active evolution 🚧
 
-# FreshPress
+FreshPress is a modular static site generator (SSG) built on Fresh v2, designed to deliver an "out-of-the-box" high-performance static site solution through a plugin-driven architecture and minimalist CLI toolchain. As Fresh v2 evolves, the project is progressively splitting functionality into independent plugins and a lightweight core CLI.
 
-FreshPress is a modern static site generator based on [Deno](https://deno.land) and [Fresh](https://fresh.deno.dev), designed for creating high-performance websites with a great developer experience.
+### 🌟 Architecture Design
+1. Core Components
+- @freshpress/cli: Command-line interface providing init, build, and dev commands.
 
-## Features
-
-- 🚀 **High Performance**: Built on Deno and Fresh for optimal speed and efficiency
-- 🔌 **Plugin System**: Extensible architecture for customization and features
-- 📚 **Documentation System**: Built-in support for comprehensive documentation sites
-- 🌍 **Internationalization**: Native multi-language support
-- 🔍 **Full-Text Search**: Integrated search capabilities without external dependencies
-- 📝 **Markdown Support**: First-class Markdown rendering with extended features
-- 🎨 **Theming**: Flexible theme system for customizing appearance
-- 📱 **Responsive Design**: Mobile-friendly layouts out of the box
-- 🛠️ **Developer Experience**: Hot reloading, simple commands, and intuitive workflows
-
-## Quick Start
-
-```bash
-# Install FreshPress
-deno run -A https://freshpress.deno.dev
-
-# Create a new project
-freshpress create my-website
-
-# Start development server
-cd my-website
-deno task dev
-```
-
-## Documentation
-
-Comprehensive documentation is available at [https://freshpress.deno.dev/docs](https://freshpress.deno.dev/docs).
-
-## Plugin Ecosystem
-
-FreshPress includes several core plugins:
-
-- **Blog**: Content management for blog posts
-- **Projects**: Project showcase capabilities
-- **Search**: Full-text search functionality
-- **i18n**: Internationalization support
-- **Content**: Generic content management
-- **Date**: Date formatting and localization
-- [ **Screenshot**: Simple Screenshot plugin](https://github.com/SisyphusZheng/fresh-plugins-screenshot) can be use right now
+2. Plugin System
+- @freshpress/fresh-plugin-blog	Blog content management & routing	In Development
+- @freshpress/fresh-plugin-search	Dependency-free full-text search	Planned
+- @freshpress/fresh-plugin-i18n	Multi-language content routing	Planned
+- [ **@freshpress/fresh-plugin-screenshot**](https://github.com/SisyphusZheng/fresh-plugins-screenshot) Simple Screenshot plugin can be use right now
